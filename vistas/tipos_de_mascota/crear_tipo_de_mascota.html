@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+   <head>
+      <!-- Required meta tags -->
+      <meta charset="utf-8">
+      
+      <!-- Bootstrap CSS -->
+      
+      <!-- Latest compiled and minified CSS -->
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
+
+      <!-- jQuery library -->
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+      <!-- Popper JS -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"></script>
+
+      <!-- Latest compiled JavaScript -->
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+
+      <title>48 Horas</title>
+      <link href="https://fonts.googleapis.com/css?family=Work+Sans" rel="stylesheet">
+
+      <!--Cargamos los íconos-->
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+      
+
+      <!-- Latest compiled and minified CSS -->
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/css/bootstrap-select.min.css">
+
+      <!-- Latest compiled and minified JavaScript -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/js/bootstrap-select.min.js"></script>
+
+      <script src="../../js/cookie.js"></script>
+      <script src="../../js/utilidades.js"></script>      
+      <link rel="stylesheet" href="../../css/estilos.css">
+      
+   </head>
+<div id="loading"></div>
+   <script>
+      $(document).ready(function() {
+       llenar_menu(); 
+       llenar_encabezado();                
+        $("#button_ver_tipos_de_mascotas" ).addClass("active");
+        quitar_loading(); 
+      });
+
+      function registrar()
+      {
+         //Creamos-->
+         var form = {};
+         form.nombre = $("#nombre").val();        
+
+         console.log(JSON.stringify(form)); 
+         return; 
+         //Realizamos la solicitud AJAX. 
+         var settings = {
+           "async": false,
+           "crossDomain": true,
+           "url": `${api_url}/tiposdemascota`, 
+           "method": "POST",
+           "headers": {
+             "Content-Type": "application/json",
+             "cache-control": "no-cache",
+             "token": `${Cookies.get('token')}`, 
+             "id_usuario": `${Cookies.get('id_usuario')}`
+           },
+           "processData": false,
+           "data": JSON.stringify(form)
+         }
+      
+         $.ajax(settings).done(function (data) {
+           //Hacemos Append a la lista de razas (lista_razas)-->
+           var obj = JSON.parse(data);          
+           var id=obj[0]["id"];  
+           window.location.href = `./actualizar_tipo_de_mascota.html?id=${id}`; 
+        
+           
+           }); 
+      }
+      
+   </script>
+   <style>
+   </style>
+   <body>
+      <div class="container-fluid">
+         <div class="row" id="encabezado">
+         </div>
+         <div class="row">
+            <div class="col-12 col-lg-2 panel_menu" id="menu"> 
+            </div>
+            <!-- Contenido de la página --> 
+            <div id="contenido_de_pagina" class="col-12 col-lg-10 contenido_de_pagina">
+               <div class="row" style="padding-left: 20px;padding-right: 20px;">
+                  <div class="col-12">
+                     <div class="row form-group">
+                     <div class="col-12 encabezado_principal">
+                           Tipo de Mascota
+                        </div>
+                        <div class="col-12 contenido_principal">
+                           <div class="row tamanio_letra_estandar">
+                              <div class="col-12 form-group"></div>
+                              <div class="col-12 form-group">
+                                 <div class="row form-group">
+                                    <div class="col-2" style="text-align: right;">Tipo:</div>
+                                    <input type="text" id="nombre" class="col-5 form-control" placeholder="Tipo"/> 
+                                    <div class="col-1"></div>
+                                    <div class="col-3 btn_rectangle" onclick="registrar()">Guardar Cambios</div>
+                                 </div>                                 
+                                </div>                              
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </body>
+</html>

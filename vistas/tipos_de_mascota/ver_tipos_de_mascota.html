@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+   <head>
+      <!-- Required meta tags -->
+      <meta charset="utf-8">
+      
+      <!-- Bootstrap CSS -->
+      
+      <!-- Latest compiled and minified CSS -->
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
+
+      <!-- jQuery library -->
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+      <!-- Popper JS -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"></script>
+
+      <!-- Latest compiled JavaScript -->
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+
+      <title>48 Horas</title>
+      <link href="https://fonts.googleapis.com/css?family=Work+Sans" rel="stylesheet">
+
+      <!--Cargamos los íconos-->
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+      
+
+      <!-- Latest compiled and minified CSS -->
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/css/bootstrap-select.min.css">
+
+      <!-- Latest compiled and minified JavaScript -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/js/bootstrap-select.min.js"></script>
+
+      <script src="../../js/cookie.js"></script>
+      <script src="../../js/utilidades.js"></script>      
+      <link rel="stylesheet" href="../../css/estilos.css">
+      
+   </head>
+<div id="loading"></div>
+   <script>
+      $(document).ready(function() {
+       llenar_menu(); 
+       llenar_encabezado(); 
+        llenar_datos();             
+        $("#button_ver_tipos_de_mascotas" ).addClass("active");
+        quitar_loading(); 
+      });
+          
+      function llenar_datos()
+      {
+
+         var settings = {
+           "async": false,
+           "crossDomain": true,
+           "url": `${api_url}/tiposdemascota`, 
+           "method": "GET",
+           "headers": {
+             "Content-Type": "application/json",
+             "cache-control": "no-cache",
+             "token": `${Cookies.get('token')}`, 
+             "id_usuario": `${Cookies.get('id_usuario')}`
+           },
+           "processData": false,                      
+            success: function(data){    
+            //Parseamos la información. 
+             var obj = JSON.parse(data);                    
+      
+             var contenido_append = ""; 
+      
+             //Cambiamos el valor actual del id para preparar el update  
+             for (var x =  0; x < obj.length; x++) 
+             {
+               var id = obj[x]["id"]; 
+               var nombre = obj[x]["nombre"]; 
+               //$("#nombre").val(obj[0]["nombre_raza"]);
+               contenido_append +=`<div class="col-12 button_menu_grande" onclick="window.location.href = 'actualizar_tipo_de_mascota.html?id=${id}';">
+                                      ${nombre}
+                                   </div>`; 
+                     
+             }
+
+      
+             $("#lista_tipos_de_mascota").append(contenido_append);
+             $("#lista_tipos_de_mascota").show('slow');
+
+           }
+         }
+      
+         $.ajax(settings);
+             
+      }
+   </script>
+   <style>
+   </style>
+   <body>
+      <div class="container-fluid">
+         <div class="row" id="encabezado">
+         </div>
+         <div class="row">
+            <div class="col-12 col-lg-2 panel_menu" id="menu"> 
+            </div>
+            <!-- Contenido de la página --> 
+            <div id="contenido_de_pagina" class="col-12 col-lg-10 contenido_de_pagina">
+               <div class="row" style="padding-left: 20px;padding-right: 20px; display: none; " id="lista_tipos_de_mascota">
+               </div>
+               <div class="row" style="padding-left: 20px;padding-right: 20px;display: none;">
+                  <div class="col-12 button_menu_grande_secundario" onclick="window.location.href = 'crear_tipo_de_mascota.html';">
+                    Registrar Nuevo
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </body>
+</html>

@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="en">
+   <head>
+      <!-- Required meta tags -->
+      <meta charset="utf-8">
+      
+      <!-- Bootstrap CSS -->
+      
+      <!-- Latest compiled and minified CSS -->
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
+
+      <!-- jQuery library -->
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+      <!-- Popper JS -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"></script>
+
+      <!-- Latest compiled JavaScript -->
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+
+      <title>48 Horas</title>
+      <link href="https://fonts.googleapis.com/css?family=Work+Sans" rel="stylesheet">
+
+      <!--Cargamos los íconos-->
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+      
+
+      <!-- Latest compiled and minified CSS -->
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/css/bootstrap-select.min.css">
+
+      <!-- Latest compiled and minified JavaScript -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/js/bootstrap-select.min.js"></script>
+
+      <script src="../../js/cookie.js"></script>
+      <script src="../../js/utilidades.js"></script>      
+      <link rel="stylesheet" href="../../css/estilos.css">
+      
+   </head>
+<div id="loading"></div>
+   <script>
+      $(document).ready(function() {
+       llenar_menu(); 
+       llenar_encabezado(); 
+        llenar_datos();           
+        $("#button_ver_tipos_de_mascotas" ).addClass("active");
+        quitar_loading(); 
+      });
+
+      function preparar_actualizar_raza(boton)
+      { 
+        
+         $("#input_raza").attr("data-id", boton.dataset.id);
+         $("#input_raza").attr("data-element_id", boton.dataset.element_id);
+
+         var talla = $("#" + boton.dataset.element_id +"_talla").html(); 
+         talla = talla.replace('(', '').replace(')', ''); 
+         $("#input_talla").val(talla);
+
+         $("#input_raza").val($("#" + boton.dataset.element_id).html());
+         $("#div_input_raza").show('slow'); 
+
+         $('html,body').animate({
+                       scrollTop: $("#input_raza").offset().top},'slow');
+         $("#input_raza").focus(); 
+
+         
+      }
+      
+      function preparar_registrar_raza()
+      {
+       //Copiamos id=-1 para el id de la raza. 
+         $("#input_raza").attr("data-id", "-1");
+         $("#input_raza").val(""); 
+         $("#input_talla").val(""); 
+         $("#div_input_raza").show('slow'); 
+         $("#input_raza").focus(); 
+      }
+      
+      function mostrar_razas()
+      {
+         $("#razas").show("slow");
+         $("#button_razas").hide("slow");   
+      }
+      
+      function guardar_cambios()
+      {
+       //Obtenmos el atributo del input que se tenga en ese momento. 
+       var id_raza = $("#input_raza").attr("data-id"); 
+       if(id_raza!=-1)
+         actualizar_raza(); 
+       else
+         registrar_raza(); 
+      }
+
+      function actualizar_tipo_de_mascota()
+      {
+         //Modificamos la raza con Ajax. 
+         var form = {};
+         form.nombre = $("#nombre_tipo_de_mascota").val();       
+
+         var settings = {
+           "async": false,
+           "crossDomain": true,
+           "url": `${api_url}/tiposdemascota/${getIdFromURL()}`, 
+           "method": "POST",
+           "headers": {
+             "Content-Type": "application/json",
+             "cache-control": "no-cache",
+             "token": `${Cookies.get('token')}`, 
+             "id_usuario": `${Cookies.get('id_usuario')}`
+           },
+           "processData": false,
+           "data": JSON.stringify(form)
+         }
+      
+         $.ajax(settings).done(function (response) {
+           //Regresamos a la ventana para ver los tipos de mascota. 
+           alert("Datos actualizados");            
+         });         
+      }
+      
+      function registrar_raza()
+      {
+
+         //Creamos-->
+         var form = {};
+         form.nombre = $("#input_raza").val();  
+         form.talla = $("#input_talla").val();           
+
+         form.id_tipo_de_mascota = getIdFromURL();      
+         
+         //Realizamos la solicitud AJAX. 
+         var settings = {
+           "async": false,
+           "crossDomain": true,
+           "url": `${api_url}/razas`, 
+           "method": "POST",
+           "headers": {
+             "Content-Type": "application/json",
+             "cache-control": "no-cache",
+             "token": `${Cookies.get('token')}`, 
+             "id_usuario": `${Cookies.get('id_usuario')}`
+           },
+           "processData": false,
+           "data": JSON.stringify(form)
+         }
+      
+         $.ajax(settings).done(function (data) {
+           //Hacemos Append a la lista de razas (lista_razas)-->
+           var obj = JSON.parse(data);          
+
+           var elemento_id_nuevo= `${obj[0]["id"]}_raza`; 
+           var nombre_nuevo = form.nombre; 
+           var talla_nueva = form.talla ==="" ? "" : `(${form.talla})`; 
+           var id_nuevo=obj[0]["id"];             
+        
+           var contenido_nuevo = `<div class='col-9' style='padding-left: 0px;'>
+               <span id='${id_nuevo}_raza' >${nombre_nuevo}</span> <span id='${id_nuevo}_raza_talla' >${talla_nueva}</span>                
+               </div> ` + 
+        `                                        <div class='col-3 button_icon' style='text-align: right; padding-right: 0px;'> ` + 
+        `                                          <span class='fa fa-pencil' data-id='${id_nuevo}' data-element_id='${elemento_id_nuevo}' onclick='preparar_actualizar_raza(this)'></span> ` + 
+        `                                        </div>`;
+        
+           $("#lista_razas").append(contenido_nuevo); 
+           //Ocultamos div_input_raza
+           $("#div_input_raza").hide("slow"); 
+           }); 
+      }
+      
+      function actualizar_raza()
+      {
+         //Obtenemos el id que usaremos para el update. 
+         var id_raza = $("#input_raza").attr("data-id");
+      
+         //Obtenemos el id del elemento para actualizar el contenido.  
+         var element_id = $("#input_raza").attr("data-element_id"); 
+         
+         //Modificamos la raza con Ajax. 
+         var form = {};
+         form.nombre = $("#input_raza").val();                  
+         form.talla = $("#input_talla").val();                  
+      
+         var settings = {
+           "async": false,
+           "crossDomain": true,
+           "url": `${api_url}/razas/${id_raza}`, 
+           "method": "POST",
+           "headers": {
+             "Content-Type": "application/json",
+             "cache-control": "no-cache",
+             "token": `${Cookies.get('token')}`, 
+             "id_usuario": `${Cookies.get('id_usuario')}`
+           },
+           "processData": false,
+           "data": JSON.stringify(form)
+         }
+      
+         $.ajax(settings).done(function (response) {
+           //Actualizamos el elemento de la raza en la interfaz.                      
+           $("#" + element_id).attr("data-talla", form.talla);
+           var talla = form.talla === ""? "": `(${form.talla})`
+           $("#" + element_id + "_talla").html(talla);    
+           $("#" + element_id).html(form.nombre);    
+           $("#div_input_raza").hide("slow");         
+         });         
+      }
+    
+      function llenar_datos()
+      {
+
+       //Obtenemos la información del id.
+       var id = getIdFromURL();      
+
+         var settings = {
+           "async": false, 
+           "crossDomain": true, 
+           "url": `${api_url}/tiposdemascota/${id}`, 
+           "method": "GET",
+           "headers": {
+             "Content-Type": "application/json",
+             "cache-control": "no-cache",
+             "token": `${Cookies.get('token')}`, 
+             "id_usuario": `${Cookies.get('id_usuario')}`
+           },
+           "processData": false,                      
+            success: function(data){              
+            //Parseamos la información. 
+             var obj = JSON.parse(data);                    
+      
+             //Fijamos el nombre de la raza. 
+             $("#nombre_tipo_de_mascota").val(obj[0]["nombre_tipo_de_mascota"]);
+      
+             var contenido_append = ""; 
+      
+             //Cambiamos el valor actual del id para preparar el update  
+             for (var x =  0; x < obj.length; x++) 
+             {
+              if(obj[x]["id_raza"]==null || obj[x]["id_raza"]=="")
+                continue; 
+               var id_raza = obj[x]["id_raza"]; 
+               var raza = obj[x]["raza"];                
+               var talla_label = obj[x]["talla"]==="" ? "": `(${obj[x]["talla"]})`; 
+               //$("#nombre").val(obj[0]["nombre_raza"]);
+               contenido_append +=`<div class='col-9' style='padding-left: 0px;'>
+               <span id='${id_raza}_raza' >${raza}</span> <span id='${id_raza}_raza_talla' >${talla_label}</span>                
+               </div> ` + 
+      `                                        <div class='col-3 button_icon' style='text-align: right; padding-right: 0px;'> ` + 
+      `                                          <span class='fa fa-pencil' data-id='${id_raza}' data-element_id='${id_raza}_raza' onclick='preparar_actualizar_raza(this)'></span></div> `; 
+                     
+             }
+      
+             $("#lista_razas").append(contenido_append);
+
+           }
+         }
+      
+         $.ajax(settings);
+             
+      }
+   </script>
+   <style>
+   </style>
+   <body>
+      <div class="container-fluid">
+         <div class="row" id="encabezado">
+         </div>
+         <div class="row">
+            <div class="col-12 col-lg-2 panel_menu" id="menu"> 
+            </div>
+            <!-- Contenido de la página --> 
+            <div id="contenido_de_pagina" class="col-12 col-lg-10 contenido_de_pagina">
+                  <div class="col-12">
+                     <div class="row form-group">
+                        <div class="col-12 letra_encabezado_naranja">
+                           Tipo de Mascota
+                        </div>
+                        <div class="col-12 contenido_principal">
+                           <div class="row tamanio_letra_estandar">
+                              <div class="col-12 form-group"></div>
+                              <div class="col-12 form-group">
+                                 <div class="row form-group">
+                                    <div class="col-2" style="text-align: right;">Tipo:</div>
+                                    <input type="text" id="nombre_tipo_de_mascota" class="col-5 form-control input_white " placeholder="Tipo"/> 
+                                    <div class="col-1"></div>
+                                    <div class="col-3 btn_rectangle" onclick="actualizar_tipo_de_mascota()">Guardar Cambios</div>
+                                 </div>
+                                 <div class="row" id="button_razas">
+                                    <div class="col-2"></div>
+                                    <div class="col-3 btn_rectangle"  onclick="mostrar_razas()">Ver Razas</div>
+                                 </div>
+                              </div>
+                              <div class="col-12 form-group" id="razas" style="display: none;">
+                                 <div class="row form-group">
+                                    <div class="col-2"></div>
+                                    <div class="col-4">
+                                       <div class="row" id="lista_razas">
+                                       </div>
+                                    </div>
+                                 </div>
+                              
+                                 <div class="row form-group" id="div_input_raza" style="display: none; ">
+                                    <div class="col-2"></div>
+                                    <div class="col-3">
+                                       <div class="row">
+                                          <input type="text" id="input_raza" placeholder="Raza" class="input_white col-12 form-control">         
+                                       </div>
+                                       <div class="row">
+                                          <input type="text" id="input_talla" placeholder="Talla" class="input_white col-12 form-control">         
+                                       </div>
+                                    </div>
+                                    <div class="col-2">
+                                       <div class="row">
+                                          <div class="col-2">
+                                          </div>
+                                          <div class="col-10 btn_rectangle" onclick="guardar_cambios()">
+                                             Aceptar
+                                          </div>
+                                       </div>
+                                    </div>
+                                 </div>
+                                 <div class="row" id="">
+                                    <div class="col-2"></div>
+                                    <div class="col-3">
+                                       <div class="row">
+                                          <div class="col-12 btn_rectangle" onclick="preparar_registrar_raza(this)">Agregar Raza</div>
+                                       </div>
+                                    </div>
+                                 </div>
+                               </div> 
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </body>
+</html>

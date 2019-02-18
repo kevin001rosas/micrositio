@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+   <head>
+      <!-- Required meta tags -->
+      <meta charset="utf-8">
+      
+      <!-- Bootstrap CSS -->
+      
+      <!-- Latest compiled and minified CSS -->
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
+
+      <!-- jQuery library -->
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+      <!-- Popper JS -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"></script>
+
+      <!-- Latest compiled JavaScript -->
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+
+      <title>48 Horas</title>
+      <link href="https://fonts.googleapis.com/css?family=Work+Sans" rel="stylesheet">
+
+      <!--Cargamos los íconos-->
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+      
+
+      <!-- Latest compiled and minified CSS -->
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/css/bootstrap-select.min.css">
+
+      <!-- Latest compiled and minified JavaScript -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/js/bootstrap-select.min.js"></script>
+
+      <script src="../../js/cookie.js"></script>
+      <script src="../../js/utilidades.js"></script>      
+      <link rel="stylesheet" href="../../css/estilos.css">
+      
+   </head>
+<div id="loading"></div>
+   <script>
+      $(document).ready(function() {
+       llenar_menu(); 
+       llenar_encabezado();         
+        $("#button_ver_tipos_de_mascotas" ).addClass("active");
+        quitar_loading(); 
+      });
+
+      function validacion()
+      {
+        $("#errores").hide(); 
+        if($('#checkbox_terminos_condiciones').is(":checked")!==true)
+        {
+          $("#errores").html("Por favor, acepta los términos y condiciones para continuar."); 
+          $("#errores").show("slow"); 
+          $("#errores").focus(); 
+          return false; 
+        }
+        return true; 
+      }
+
+      function aceptar_terminos_condiciones()
+      {
+        if(validacion()==false)
+          return; 
+
+
+        var settings = {
+           "async": false,
+           "crossDomain": true,
+           "url": `${api_url}/usuarios/getAceptarTerminos`, 
+           "method": "GET",
+           "headers": {
+             "Content-Type": "application/json",
+             "cache-control": "no-cache",
+             "token": `${Cookies.get('token')}`, 
+             "id_usuario": `${Cookies.get('id_usuario')}`,
+             "id_tipo_de_usuario": `${Cookies.get('id_tipo_de_usuario')}`, 
+           },
+           "processData": false,                      
+            success: function(data){
+              if(data==="incorrecto")
+              {
+                $("#errores").html("Ocurrió un error al actualizar la información."); 
+                $("#errores").show("slow"); 
+                $("#errores").focus(); 
+                return;
+              }
+              Cookies.set('acuerdos_leidos', '1'); 
+              window.location.href = `${base_url}/vistas/usuarios/perfil_de_usuario.html?id=${Cookies.get('id_usuario')}`; 
+
+              
+           }
+           , error: function(data)
+           {
+            contador_solicitudes++;
+            if(contador_solicitudes<cantidad_maxima_solicitudes)
+               aceptar_terminos_condiciones();                
+           }
+        }
+        $.ajax(settings);
+        
+      }
+          
+
+   </script>
+   <style>
+   </style>
+   <body>
+      <div class="container-fluid">
+         <div class="row" id="encabezado">
+         </div>
+         <div class="row">
+            <div class="col-12 col-lg-2 panel_menu" id="menu"> 
+            </div>
+            <!-- Contenido de la página --> 
+            <div id="contenido_de_pagina" class="col-12 col-lg-10 contenido_de_pagina">
+              <div class="row">
+                <div class="col-12 letra_encabezado_naranja form-group" style="text-align: center;">
+                  POLÍTICA DE MARS PETCARE PARA LOS PATROCINIOS, ASOCIACIONES Y DONACIONES
+                </div>
+                <div class="col-12 letra_terminos_y_condiciones form-group">                  
+                  <p>En Mars Petcare- estamos muy involucrados en actividades dedicadas a los perros, gatos,
+caballos y otros animales de todo el mundo. Cada año patrocinamos cientos de eventos
+relacionados con animales, nos asociamos con muchas organizaciones y donamos cantidades
+sustanciales de alimento para mascotas, fondos y el tiempo de asociados. Todos estos
+esfuerzos son ejecutados con una sola visión en mente: "Un mundo mejor para las mascotas
+TM".
+La expectativa hacia nuestros socios en este tipo de eventos es que:<br><br>
+• Conozcan las normas de bienestar animal que son paralelas a las representadas en nuestras
+marcas. Esto incluye el respeto a las cinco libertades de bienestar de los animales reconocidas
+a nivel internacional. Las cinco libertades de bienestar de los animales son: libres del hambre
+y la sed por el fácil acceso a agua potable y a una dieta para mantener la salud y vigor; libre
+de malestar al proporcionar un entorno adecuado que incluya cobijo y una zona de descanso
+cómoda; libre de dolor, lesiones y enfermedades mediante la prevención o el rápido
+diagnóstico y tratamiento; libre de expresar un comportamiento normal, proporcionando
+espacio suficiente, instalaciones adecuadas y la compañía de la propia especie del animal; y
+libre de miedo y angustia, asegurando condiciones y el trato que eviten el sufrimiento mental.<br><br>
+• Adoptar una visión, misión y/o valores que reflejan nuestra propia (y más específicamente
+la de nuestras marcas asociadas). Cada socio debe adoptar políticas e involucrarse en
+prácticas que se alineen con nuestra visión guía de "Un mundo mejor para las mascotas TM".<br><br>
+• Adherirse a todas las leyes nacionales y los requisitos legales, especialmente en lo que se refiere a los animales y su bienestar.
+No vamos, en ningún caso, a considerar relaciones que involucren una demostración patrocinada, espectáculo o actividad:<br><br>
+• Que deliberadamente cause daño, dolor o angustia a cualquier animal.<br><br>
+• Que promueva una dieta o actividad que resultará en un daño intencional a cualquier animal.<br><br>
+• En el que el medio ambiente para todos los animales, no es conveniente o adecuado para apoyar su bienestar.<p>
+                </div>
+                <div class="col-12 form-group">
+                  <label class="container_checkbox">
+                    Acepto términos y condiciones
+                    <input id="checkbox_terminos_condiciones" type="checkbox">
+                    <span class="checkmark"></span>
+                  </label>
+                </div>
+                <div id="errores" class="col-12 form-group tamanio_letra_errores">                             
+                </div>                
+                <div class="col-12 form-group">
+                  <div class="row">
+                    <div class="col-8"></div>
+                    <div class="col-4">
+                      <div class="btn_rectangle" onclick="aceptar_terminos_condiciones();">Continuar</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+         </div>
+      </div>
+   </body>
+</html>

@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="en">
+   <head>
+      <!-- Required meta tags -->
+      <meta charset="utf-8">
+      
+      <!-- Bootstrap CSS -->
+      
+      <!-- Latest compiled and minified CSS -->
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
+
+      <!-- jQuery library -->
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+      <!-- Popper JS -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"></script>
+
+      <!-- Latest compiled JavaScript -->
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+
+      <title>48 Horas</title>
+      <link href="https://fonts.googleapis.com/css?family=Work+Sans" rel="stylesheet">
+
+      <!--Cargamos los íconos-->
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+      
+
+      <!-- Latest compiled and minified CSS -->
+      <link rel="stylesheet" href="../../css/bootstrap-select.css">
+
+      <!-- Latest compiled and minified JavaScript -->
+      <script src="../../js/bootstrap-select.js"></script>
+
+      <script src="../../js/cookie.js"></script>
+      <script src="../../js/utilidades.js"></script>      
+      <link rel="stylesheet" href="../../css/estilos.css">
+      
+   </head>
+<div id="loading"></div>
+   <script>
+
+    var mascota = {};   
+
+      var url_foto = ""; 
+      $(document).ready(function() {
+       llenar_menu(); 
+       llenar_encabezado(); 
+       llenar_comboboxes();          
+       poner_fecha_de_hoy("fecha_de_nacimiento_camada");        
+        $("#button_ver_kits" ).addClass("active");
+
+        //Ponemos el evento para el hover de la cámara. 
+        $("#foto_url").hover(poner_hover_foto, quitar_hover_foto);
+        quitar_loading(); 
+      });
+
+      function poner_hover_foto()
+      {
+        //alert("Entra"); 
+        //Ponemos el imagen de preview. 
+        $("#foto_url").attr('src', default_image_url);        
+      }
+
+      function quitar_hover_foto()
+      {
+        //Quitamos la imagen del preview. 
+        //alert("Sale"); 
+        $("#foto_url").attr('src', url_foto);        
+        
+      }
+
+      function llenar_comboboxes()
+      {
+        llenar_tipos_de_mascota();
+        llenar_tipos_de_kit(); 
+      }
+
+      function llenar_tipos_de_kit()
+      {
+        contador_solicitudes++; 
+        var settings = {
+           "async": false,
+           "crossDomain": true,
+           "url": `${api_url}/tiposdekit`, 
+           "method": "GET",
+           "headers": {
+             "Content-Type": "application/json",
+             "cache-control": "no-cache",
+             "token": `${Cookies.get('token')}`, 
+             "id_usuario": `${Cookies.get('id_usuario')}`
+           },
+           "processData": false,                      
+            success: function(data){    
+            console.log(data); 
+            //Parseamos la información. 
+             var obj = JSON.parse(data);                
+
+             
+      
+             //Limpiamos el contenido actual 
+             $("#id_tipo_de_kit").html("");
+             var nuevo_contenido = ""; 
+
+             //Llenamos las nuevas opciones. 
+             for (var x =  0; x < obj.length; x++) 
+             {
+               var id = obj[x]["id"]; 
+               var nombre = obj[x]["nombre"];                
+               nuevo_contenido += `<option value="${id}">${nombre}</option>`; 
+             }
+
+             $("#id_tipo_de_kit").html(nuevo_contenido);   
+             //Seleccinamos la primera opción (para llenar las razas)
+             $('#id_tipo_de_kit').selectpicker('val', $("#id_tipo_de_kit option:first").val());
+             $("#id_tipo_de_kit").selectpicker('refresh'); 
+           }
+          , error: function() {
+               //Volvemos a invocar la función. 
+               if(contador_solicitudes<cantidad_maxima_solicitudes)
+               llenar_tipos_de_kit();                
+            }
+         }
+      
+         $.ajax(settings); 
+
+      }      
+
+
+      function llenar_tipos_de_mascota()
+      {
+        contador_solicitudes++; 
+        var settings = {
+           "async": false,
+           "crossDomain": true,
+           "url": `${api_url}/tiposdemascota`, 
+           "method": "GET",
+           "headers": {
+             "Content-Type": "application/json",
+             "cache-control": "no-cache",
+             "token": `${Cookies.get('token')}`, 
+             "id_usuario": `${Cookies.get('id_usuario')}`
+           },
+           "processData": false,                      
+            success: function(data){    
+            console.log(data); 
+            //Parseamos la información. 
+             var obj = JSON.parse(data);                
+
+             
+      
+             //Limpiamos el contenido actual 
+             $("#id_tipo_de_mascota").html("");
+             var nuevo_contenido = ""; 
+
+             //Llenamos las nuevas opciones. 
+             for (var x =  0; x < obj.length; x++) 
+             {
+               var id = obj[x]["id"]; 
+               var nombre = obj[x]["nombre"];                
+               nuevo_contenido += `<option value="${id}">${nombre}</option>`; 
+             }
+
+             $("#id_tipo_de_mascota").html(nuevo_contenido);   
+             //Seleccinamos la primera opción (para llenar las razas)
+             $('#id_tipo_de_mascota').selectpicker('val', $("#id_tipo_de_mascota option:first").val());
+             $("#id_tipo_de_mascota").selectpicker('refresh'); 
+           }
+          , error: function() {
+               //Volvemos a invocar la función. 
+               if(contador_solicitudes<cantidad_maxima_solicitudes)
+               llenar_tipos_de_mascota();                
+            }
+         }
+      
+         $.ajax(settings); 
+
+      }
+
+      function llenar_razas()
+      {
+        var id = $('#id_tipo_de_mascota').selectpicker('val'); 
+        
+        
+                //Obtenemos la información del id.
+         var settings = {
+           "async": false,
+           "crossDomain": true,
+           "url": `${api_url}/tiposdemascota/${id}`, 
+           "method": "GET",
+           "headers": {
+             "Content-Type": "application/json",
+             "cache-control": "no-cache",
+             "token": `${Cookies.get('token')}`, 
+             "id_usuario": `${Cookies.get('id_usuario')}`
+           },
+           "processData": false,                      
+            success: function(data){    
+            console.log(data); 
+            //Parseamos la información. 
+             var obj = JSON.parse(data);                    
+                   
+             var nuevo_contenido = ""; 
+      
+             //Cambiamos el valor actual del id para preparar el update  
+             for (var x =  0; x < obj.length; x++) 
+             {
+              if(obj[x]["id_raza"]==null || obj[x]["id_raza"]=="")
+                continue; 
+               var id_raza = obj[x]["id_raza"]; 
+               var raza = obj[x]["raza"]; 
+               var talla = obj[x]["talla"] ===""? "": `(${obj[x]["talla"]})`; 
+               nuevo_contenido += `<option value="${id_raza}">${raza} ${talla}</option>`;
+               
+             }            
+
+             $("#id_raza").html(nuevo_contenido);   
+             //Seleccinamos la primera opción (para llenar las razas)
+             $('#id_raza').selectpicker('val', $("#id_raza option:first").val());
+             $("#id_raza").selectpicker('refresh'); 
+           }
+         }
+      
+         $.ajax(settings); 
+        
+      }
+
+      function validacion()
+      {      
+        $("#errores").hide(); 
+        $('html,body').animate({
+                       scrollTop: $("#errores").offset().bottom},'slow');                
+
+          var fecha_seleccionada = document.getElementById('fecha_de_nacimiento_camada'); 
+          fecha_seleccionada = new Date(fecha_seleccionada.value);           
+          fecha_seleccionada.setDate(fecha_seleccionada.getDate()+1); 
+
+          fecha_de_hoy = new Date();
+
+          var mes_superior = new Date(); 
+          var mes_inferior = new Date(); 
+
+          mes_superior.setMonth(fecha_de_hoy.getMonth()+1);
+          mes_inferior.setMonth(fecha_de_hoy.getMonth()-1);
+
+          var mensaje = `Seleccion: ${fecha_seleccionada}\nSuperior: ${mes_superior}\nInferior: ${mes_inferior}`; 
+
+          //alert(mensaje); 
+          
+
+           if ((fecha_seleccionada > mes_superior || fecha_seleccionada < mes_inferior)) {               
+               $("#errores").html("La fecha de nacimiento de camada no es válida (1 mes antes o después de hoy)."); 
+              $("#errores").show("slow");              
+               return false; 
+           }   
+
+        if(numero_valido($("#cantidad").val())==false) 
+        {
+          $("#errores").html("Debes solicitar al menos un kit para continuar."); 
+          $("#errores").show("slow");              
+          return false; 
+        }
+
+        if($("#cantidad").val()<=0)
+        {
+          $("#errores").html("Debes solicitar al menos un kit para continuar."); 
+          $("#errores").show("slow");              
+          return false; 
+        }
+
+        if($("#comentarios").val()=="") 
+        {
+          $("#errores").html("Debes especificar comentarios para continuar."); 
+          $("#errores").show("slow");              
+          return false; 
+        }
+          }
+
+      
+      function insertar()
+      {
+        if(validacion()==false)
+          return; 
+         //Modificamos la raza con Ajax. 
+         var form = {};
+                  
+
+         form.nombre = $("#nombre").val();
+         form.fecha_de_nacimiento_camada = $("#fecha_de_nacimiento_camada").val();         
+         form.id_raza = $("#id_raza").val(); 
+         form.cantidad = $("#cantidad").val(); 
+         form.comentarios = $("#comentarios").val(); 
+         form.id_solicitado_por = `${Cookies.get('id_usuario')}`; 
+         form.id_tipo_de_kit = $("#id_tipo_de_kit").val(); 
+
+         form.id_cliente = getValueFromUrl("id_cliente"); 
+         form.foto_url = '';
+
+         var settings = {
+           "async": false,
+           "crossDomain": true,
+           "url": `${api_url}/kits`, 
+           "method": "POST",
+           "headers": {
+             "Content-Type": "application/json",
+             "cache-control": "no-cache",
+             "token": `${Cookies.get('token')}`, 
+             "id_usuario": `${Cookies.get('id_usuario')}`
+           },
+           "processData": false,
+           "data": JSON.stringify(form)
+         }
+      
+         $.ajax(settings).done(function (data) {
+            console.log(data); 
+            if(data==="incorrecto")
+            {
+              alert("No se registro la mascota"); 
+              return;
+            }
+
+           //Regresamos a la ventana para actualizar los datos de la mascota. 
+           var obj = JSON.parse(data);
+           alert("Se ha solicitado el Kit.");
+           window.location.href = `./ver_kits.html`; 
+         });         
+      }
+
+
+      function registrar_raza()
+      {
+         //Creamos-->
+         var form = {};
+         form.nombre = $("#input_raza").val();        
+         form.id_tipo_de_raza = getIdFromURL();                             
+        
+         //Realizamos la solicitud AJAX. 
+         var settings = {
+           "async": false,
+           "crossDomain": true,
+           "url": `${api_url}/razas`, 
+           "method": "POST",
+           "headers": {
+             "Content-Type": "application/json",
+             "cache-control": "no-cache",
+             "token": `${Cookies.get('token')}`, 
+             "id_usuario": `${Cookies.get('id_usuario')}`
+           },
+           "processData": false,
+           "data": JSON.stringify(form)
+         }
+      
+         $.ajax(settings).done(function (data) {
+           //Hacemos Append a la lista de razas (lista_razas)-->
+           var obj = JSON.parse(data);          
+
+           var elemento_id_nuevo= `${obj[0]["id"]}_raza`; 
+           var nombre_nuevo = form.nombre; 
+           var id_nuevo=obj[0]["id"];  
+        
+           var contenido_nuevo = `<div class='col-9' id='${elemento_id_nuevo}' style=''>${nombre_nuevo}</div> ` + 
+        `                                        <div class='col-3 button_icon' style='text-align: right; padding-right: 0px;'> ` + 
+        `                                          <span class='fa fa-pencil' data-id='${id_nuevo}' data-element_id='${elemento_id_nuevo}' onclick='preparar_actualizar_raza(this)'></span> ` + 
+        `                                        </div>`;
+        
+           $("#lista_razas").append(contenido_nuevo); 
+           //Ocultamos div_input_raza
+           $("#div_input_raza").hide("slow"); 
+           }); 
+      }
+      
+      function actualizar_raza()
+      {
+         //Obtenemos el id que usaremos para el update. 
+         var id_raza = $("#input_raza").attr("data-id");
+      
+         //Obtenemos el id del elemento para actualizar el contenido.  
+         var element_id = $("#input_raza").attr("data-element_id"); 
+         
+         //Modificamos la raza con Ajax. 
+         var form = {};
+         form.nombre = $("#input_raza").val();                  
+      
+         var settings = {
+           "async": false,
+           "crossDomain": true,
+           "url": `${api_url}/razas/${id_raza}`, 
+           "method": "POST",
+           "headers": {
+             "Content-Type": "application/json",
+             "cache-control": "no-cache",
+             "token": `${Cookies.get('token')}`, 
+             "id_usuario": `${Cookies.get('id_usuario')}`
+           },
+           "processData": false,
+           "data": JSON.stringify(form)
+         }
+      
+         $.ajax(settings).done(function (response) {
+           //Actualizamos el elemento de la raza en la interfaz.           
+           var nuevo_valor = $("#input_raza").val();         
+           $("#" + element_id).html(nuevo_valor);         
+           $("#div_input_raza").hide("slow");         
+         });         
+      }
+
+
+   </script>
+   <style>
+   </style>
+   <body>
+      <div class="container-fluid" >
+         <div class="row" id="encabezado">
+         </div>
+         <div class="row">
+            <div class="col-12 col-lg-2 panel_menu" id="menu"> 
+            </div>
+            <!-- Contenido de la página --> 
+            <div id="contenido_de_pagina" class="col-12 col-lg-10 contenido_de_pagina">
+              <div class="row">
+                    <div class="col-12">
+                     <div class="row form-group div_row_tarjeta">
+                        <div class="col-12 div_tarjeta_arriba_encabezado">
+                           Datos de Mascota
+                        </div>
+                        <div class="col-12 div_tarjeta_abajo_contenido">
+                           <div class="row tamanio_letra_estandar">
+                              <div class="col-12 form-group"></div>
+                              <div class="col-12 form-group">
+                                 <div class="row form-group">        
+                                    <div class="col-12" style="padding-left: 50px;">
+                                      <div class="row form-group">
+                                        <div class="col-4 label_campo" style="text-align: right;">Cantidad de Kits:</div>
+                                          <input type="number" id="cantidad" class="col-7 form-control" placeholder="Cantidad de Kits"/>    
+                                      </div>
+                                      <div class="row form-group">
+                                        <div class="col-4 label_campo" style="text-align: right;">Tipo de kit:</div>
+                                          <select id="id_tipo_de_kit" onchange="llenar_razas()" class="col-7 form-control selectpicker" placeholder="Tipo de kit">                                              
+                                          </select>                                                                         
+                                      </div>
+                                      <div class="row form-group">
+                                        <div class="col-4 label_campo" style="text-align: right;">Fecha de Nacimiento de Camada:</div>
+                                          <input type="date" id="fecha_de_nacimiento_camada" class="col-7 form-control" placeholder="fecha_de_nacimiento"/>
+                                      </div>                                      
+                                      <div class="row form-group">
+                                        <div class="col-4 label_campo" style="text-align: right;">Tipo de mascota:</div>
+                                          <select id="id_tipo_de_mascota" onchange="llenar_razas()" class="col-7 form-control selectpicker" placeholder="Tipo de mascota">                                              
+                                          </select>                                                                         
+                                      </div>
+                                      <div class="row form-group">
+                                        <div class="col-4 label_campo" style="text-align: right;">Raza:</div>
+                                          <select id="id_raza" class="col-7 form-control selectpicker" placeholder="Raza">
+                                          </select>
+                                      </div>    
+                                      <div class="row form-group">
+                                        <div class="col-4 label_campo" style="text-align: right;">Comentarios:</div>
+                                          <textarea id="comentarios" class="form-control col-7" rows="4"></textarea>
+                                      </div>
+                                      <div class="row form-group" style="display: none;">
+                                        <div class="col-4 label_campo" style="text-align: right;">estado: (No se muestra)</div>
+                                          <input type="text" id="estado" class="col-7 form-control" placeholder="estado"/>    
+                                      </div>                                      
+                                      <div class="row justify-content-center form-group">
+                                        <div class="col-6"></div>
+                                      <div class="col-4 btn_rectangle" onclick="insertar()">
+                                        Guardar Cambios                                        
+                                      </div>
+                                    </div>                                   
+                                    <div class="row form-group">
+                                      <div id="errores" style="display: none;" class="col-12 tamanio_letra_errores">Errores</div>
+                                    </div>
+                                    </div> 
+
+                                 </div>
+                              </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  </div>
+               </div>
+            </div>         
+   </body>
+</html>

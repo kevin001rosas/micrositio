@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="en">
+   <head>
+      <!-- Required meta tags -->
+      <meta charset="utf-8">
+      
+      <!-- Bootstrap CSS -->
+      <!-- Latest compiled and minified CSS -->
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
+      <!-- jQuery library -->
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+      <!-- Popper JS -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"></script>
+      <!-- Latest compiled JavaScript -->
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+      <title>48 Horas</title>
+      <link href="https://fonts.googleapis.com/css?family=Work+Sans" rel="stylesheet">
+      <!--Cargamos los íconos-->
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+      <!-- Latest compiled and minified CSS -->
+      <link rel="stylesheet" href="../../css/bootstrap-select.css">
+      <!-- Latest compiled and minified JavaScript -->
+      <script src="../../js/bootstrap-select.js"></script>
+      <script src="../../js/cookie.js"></script>
+      <script src="../../js/utilidades.js"></script>      
+      <link rel="stylesheet" href="../../css/estilos.css">
+   </head>
+<div id="loading"></div>
+   <script>
+      var usuario = {};   
+      cantidad_maxima_solicitudes = 10; 
+      var url_foto = ""; 
+      $(document).ready(function() {
+
+       llenar_menu(); 
+       llenar_encabezado(); 
+       
+        llenar_datos();           
+        quitar_loading();
+        if(getIdFromURL()===Cookies.get('id_usuario'))           
+          $("#button_ver_perfil").addClass("active");
+        else          
+          $("#button_ver_usuarios").addClass("active");
+      });
+
+      function llenar_datos()
+      {
+        llenar_usuario();         
+        
+        //Solo en caso de que sea un usuario de criador, mostraremos la información adicional. 
+        if(usuario.id_tipo_de_usuario.toString()==="1")
+        {
+          $("#div_informacion_general").removeClass("col-xl-8");
+
+          $("#div_nivel_de_usuario").hide();
+          $("#div_certificados").hide();
+        }
+        else
+        {
+          llenar_nivel();      
+          llenar_clientes(); 
+          llenar_cuenta_de_clientes(); 
+          //llenar_inventario_de_mascotas(); 
+        }
+        
+      }
+
+      function llenar_inventario_de_mascotas()
+      {        
+        var settings = {
+           "async": false,
+           "crossDomain": true,
+           "url": `${api_url}/usuarios/getUserPetsByPage`, 
+           "method": "GET",
+           "headers": {
+             "Content-Type": "application/json",
+             "cache-control": "no-cache",
+             "token": `${Cookies.get('token')}`, 
+             "id_usuario": `${Cookies.get('id_usuario')}`,
+             "id_tipo_de_usuario": `${Cookies.get('id_tipo_de_usuario')}`, 
+             "id_usuario_busqueda": `${getValueFromUrl('id')}`,              
+             "pagina" : "1", 
+             "nombre" : "", 
+           },
+           "processData": false,                      
+            success: function(data){
+            //Limpiamos el contenido de las clientes.
+            $("#inventario_de_mascotas").hide(""); 
+            $("#inventario_de_mascotas").html("");               
+            //Parseamos la información. 
+             var obj = JSON.parse(data);   
+             console.log(data); 
+      
+             var contenido_append = ""; 
+
+             contenido_append += `
+                          <table style="width: 100%;margin-top: 15px;">
+                            <tr class="tr_no_hover" style="border-bottom-left-radius: 40px;">
+                              <th class="th_left" style="width: 30%;">Cantidad</th>
+                              <th style="width: 30%">Raza</th>
+                              <th style="width: 20%">Talla</th>
+                              <th class="th_right" style="width: 20%">Tipo</th>
+                            </tr>`   
+      
+             //Cambiamos el valor actual del id para preparar el update  
+             for (var x =  0; x < 6; x++)
+             {
+               contenido_append += `
+                            <tr>
+                              <td>${obj[x]["cantidad"]}</td>
+                              <td>${obj[x]["raza"]}</td>
+                              <td>${obj[x]["talla"]}</td>
+                              <td>${obj[x]["tipo_de_mascota"]}</td>
+                            </tr>
+                          `;
+             }
+
+             contenido_append += `</table>`; 
+
+      
+             $("#inventario_de_mascotas").html(contenido_append);
+             $("#inventario_de_mascotas").show("slow"); 
+             
+
+           }
+           , error: function(data)
+           {
+            contador_solicitudes++;
+            if(contador_solicitudes<cantidad_maxima_solicitudes)
+               llenar_inventario_de_mascotas();                
+           }
+        }
+        $.ajax(settings);
+    }
+
+      function llenar_nivel()
+      { 
+        var settings = {
+           "async": false,
+           "crossDomain": true,
+           "url": `${api_url}/usuarios/getUserLevel/${getValueFromUrl("id")}`, 
+           "method": "GET",
+           "headers": {
+             "Content-Type": "application/json",
+             "cache-control": "no-cache",
+             "token": `${Cookies.get('token')}`, 
+             "id_usuario": `${Cookies.get('id_usuario')}`,
+              "id_tipo_de_usuario": `${Cookies.get('id_tipo_de_usuario')}`
+           },
+           "processData": false,                      
+            success: function(data){    
+              console.log(data); 
+              
+            //Limpiamos el contenido de las clientes.
+            $("#tarjeta_nivel").hide("slow"); 
+            $("#tarjeta_nivel").html("");               
+            //Parseamos la información. 
+             var obj = JSON.parse(data);   
+             console.log(data); 
+      
+             var contenido_append = ""; 
+             cantidad_elementos_en_pagina = obj.length; 
+
+      
+             //Cambiamos el valor actual del id para preparar el update  
+             for (var x =  0; x < obj.length; x++)
+             {
+
+              isUrlExists(obj[x]["foto_url"], function(status){
+                    if(status === 200){
+                       // file was found                   
+                    }
+                    else if(status === 404){
+                       // 404 not found
+                       obj[x]["foto_url"] = default_image_url;                       
+                    }
+                });
+              
+              
+              
+
+              //$("#nombre").val(obj[0]["nombre_raza"]);
+               contenido_append += `
+                    <div class="col-12 div_tarjeta_arriba_encabezado">
+                        Nivel
+                     </div>
+                     <div class="col-12">
+                      <div class="row" style="padding-top: 10px;padding-bottom: 10px;">
+                        <div class="col-6" style="text-align:center;">
+                          <img src='${obj[x]["foto_url"]}' style="height:140px;">        
+                        </div>
+                        <div class="col-6" style="font-size: 40px;text-align: left;margin-top: auto; margin-bottom: auto;font-weight: 700;">
+                          ${obj[x]["nombre"]}
+                        </div>
+                      </div>                          
+                     </div>`;
+             }
+
+      
+             $("#tarjeta_nivel").html(contenido_append);
+             $("#tarjeta_nivel").show("slow");              
+
+           }
+           , error: function(data)
+           {
+            contador_solicitudes++;
+            if(contador_solicitudes<cantidad_maxima_solicitudes)
+               llenar_nivel();                
+            return; 
+           }
+         }
+      
+         $.ajax(settings);
+      }
+
+      function llenar_tabla_sin_clientes()
+      {
+                  $("#tabla_clientes").hide(); 
+
+          var contenido_append = `
+                                 <div class="col-12" style="text-align: center; font-size: 30px; ">
+                                  Sin Certificados
+                                 </div>
+                               `; 
+
+      
+             $("#tabla_clientes").html(contenido_append);
+             $("#tabla_clientes").show("slow"); 
+      }
+            function llenar_clientes()
+      { 
+        var settings = {
+           "async": false,
+           "crossDomain": true,
+           "url": `${api_url}/usuarios/getUserClients/${getValueFromUrl("id")}`, 
+           "method": "GET",
+           "headers": {
+             "Content-Type": "application/json",
+             "cache-control": "no-cache",
+             "token": `${Cookies.get('token')}`, 
+             "id_usuario": `${Cookies.get('id_usuario')}`,
+             "id_tipo_de_usuario": `${Cookies.get('id_tipo_de_usuario')}`                                   
+           },
+           "processData": false,                      
+            success: function(data){    
+            if(data==="vacio")      
+            {                   
+              llenar_tabla_sin_clientes(); 
+              return; 
+            }
+              console.log(data); 
+              
+            //Limpiamos el contenido de las clientes.
+            $("#tabla_clientes").hide(""); 
+            $("#tabla_clientes").html("");               
+            //Parseamos la información. 
+             var obj = JSON.parse(data);   
+             console.log(data); 
+      
+             var contenido_append = ""; 
+
+             contenido_append += `
+                          <table style="width: 100%;margin-top: 15px;">
+                            <tr class="tr_no_hover" style="border-bottom-left-radius: 40px;">
+                              <th class="th_left" style="width: 30%;">Cliente</th>
+                              <th style="width: 30%">Correo</th>
+                              <th style="width: 20%">Celular</th>
+                              <th class="th_right" style="width: 20%">Fecha de Nacimiento</th>
+                            </tr>`   
+      
+             //Cambiamos el valor actual del id para preparar el update  
+             for (var x =  0; x < obj.length; x++)
+             {
+               contenido_append += `
+                            <tr onclick="window.location.href='../clientes/perfil_de_cliente.html?id=${obj[x]["id"]}'">
+                              <td>${obj[0]["cliente"]}</td>
+                              <td>${obj[0]["email"]}</td>
+                              <td>${obj[0]["telefono_celular"]}</td>
+                              <td>${obj[0]["fecha_de_nacimiento"]}</td>
+                            </tr>
+                          `;
+             }
+
+             contenido_append += `</table>`; 
+
+      
+             $("#tabla_clientes").html(contenido_append);
+             $("#tabla_clientes").show("slow"); 
+             
+
+           }
+           , error: function(data)
+           {
+            contador_solicitudes++;
+            if(contador_solicitudes<cantidad_maxima_solicitudes)
+               llenar_clientes();                
+           }
+         }
+      
+         $.ajax(settings);
+      }
+      function llenar_cuenta_de_clientes()
+      { 
+        var settings = {
+           "async": false,
+           "crossDomain": true,
+           "url": `${api_url}/usuarios/getUserClientsCount/${getValueFromUrl("id")}`, 
+           "method": "GET",
+           "headers": {
+             "Content-Type": "application/json",
+             "cache-control": "no-cache",
+             "token": `${Cookies.get('token')}`, 
+             "id_usuario": `${Cookies.get('id_usuario')}`,
+              "id_tipo_de_usuario": `${Cookies.get('id_tipo_de_usuario')}`
+           },
+           "processData": false,                      
+            success: function(data){    
+              console.log(data); 
+              
+            //Limpiamos el contenido de las clientes.
+            $("#cuenta_clientes").hide(""); 
+            $("#cuenta_clientes").html("");               
+            //Parseamos la información. 
+             var obj = JSON.parse(data);   
+             console.log(data); 
+      
+             var contenido_append = ""; 
+
+             contenido_append += `<div class="col-12">
+                                    <div class="row">`; 
+      
+             //Cambiamos el valor actual del id para preparar el update  
+             for (var x =  0; x < obj.length; x++)
+             {
+               contenido_append += `
+                          <div class="col-12 col-xl-12" style="text-align: left;"><b>${obj[x]["nombre"]}:</b> ${obj[x]["cuenta"]}</div>
+                          `;
+             }             
+
+             contenido_append += `
+                        </div>
+                          <div class="row">
+                            <div class="col-12 col-xl-9"></div>
+                              <div class="col-12 col-xl-3 btn_rectangle" onclick="window.location.href='../clientes/ver_clientes.html?id_search_user=${getValueFromUrl("id")}'">
+                                Ver Todo
+                              </div>
+                            </div>
+                          </div>
+                        </div>`; 
+
+      
+             $("#cuenta_clientes").html(contenido_append);
+             $("#cuenta_clientes").show("slow"); 
+             
+
+           }
+           , error: function(data)
+           {
+            contador_solicitudes++;
+            if(contador_solicitudes<cantidad_maxima_solicitudes)
+               llenar_clientes();                
+           }
+         }
+      
+         $.ajax(settings);
+      }
+      
+      function llenar_usuario()
+      { 
+        var settings = {
+           "async": false,
+           "crossDomain": true,
+           "url": `${api_url}/usuarios/${getValueFromUrl("id")}`, 
+           "method": "GET",
+           "headers": {
+             "Content-Type": "application/json",
+             "cache-control": "no-cache",
+             "token": `${Cookies.get('token')}`, 
+             "id_usuario": `${Cookies.get('id_usuario')}`,
+             "id_tipo_de_usuario": `${Cookies.get('id_tipo_de_usuario')}`                                      
+           },
+           "processData": false,                      
+            success: function(data){    
+              console.log(data); 
+              
+            //Limpiamos el contenido de las clientes.
+            $("#tarjeta_usuario").hide("slow"); 
+            $("#tarjeta_usuario").html("");               
+            //Parseamos la información. 
+             var obj = JSON.parse(data);   
+             console.log(data); 
+      
+             var contenido_append = ""; 
+             cantidad_elementos_en_pagina = obj.length; 
+
+
+             usuario.id_tipo_de_usuario = obj[0]["id_tipo_de_usuario"]; 
+
+      
+             //Cambiamos el valor actual del id para preparar el update  
+             for (var x =  0; x < obj.length; x++)
+             {
+              //No mostramos el último elemento. (Solo en caso de que este la página llena)
+              if((x==obj.length-1) && (obj.length-1==cantidad_elementos_por_pagina))
+                continue;
+
+              //Validamos que exista una imagen. Sino, ponemos la default.               
+              var image = new Image(); 
+              image.src = obj[x]["foto_url"];
+              if (image.width == 0) {
+                obj[x]["foto_url"] = default_image_url;                            
+              }
+
+              console.log(default_image_url); 
+              
+
+              //$("#nombre").val(obj[0]["nombre_raza"]);
+               contenido_append += `
+                          <div class="col-12 col-xl-4" style="text-align:center;padding-top: 5px;padding-bottom: 5px;" >
+                              <img src="${obj[x]["foto_url"]}" style="height:160px; ">
+                           </div>
+                           <div class="col-12 col-xl-8" style="padding-top: 20px;">
+                              <div class="row">
+                                <div class="col-12">
+                                  <div class="row"> 
+                                    <div class="col-12 espaciado_estrecho" style="font-size: 20px;font-weight: 700;">${obj[x]["usuario"]}</div>
+                                  </div>
+                                 </div>
+                                 <div class="col-6 espaciado_estrecho" style="font-weight: 700; ">Email:</div>
+                                 <div class="col-6 espaciado_estrecho">${obj[x]["email"]}</div>
+                                 <div class="col-6 espaciado_estrecho" style="font-weight: 700; ">Cel:</div>
+                                 <div class="col-6 espaciado_estrecho">${obj[x]["telefono_celular"]}</div>
+                                 <div class="col-6 espaciado_estrecho" style="font-weight: 700; ">Tipo de Usuario:</div>
+                                 <div class="col-6 espaciado_estrecho">${obj[x]["tipo_de_usuario"]}</div>
+                                 <div class="col-6 espaciado_estrecho" style="font-weight: 700; ">Fecha de Nacimiento:</div>
+                                 <div class="col-6 espaciado_estrecho">${obj[x]["fecha_de_nacimiento_format"]}</div>
+                              </div>
+                           </div>
+                           <div style="position: absolute; text-align:right;right: 10px; bottom:10px;" onclick="window.location.href='./actualizar_usuario.html?id=${obj[x]["id"]}'">
+                              <span class="fa fa-pencil button_icon" style="font-size: 40px;"></span>
+                           </div>`;
+             }
+
+      
+             $("#tarjeta_usuario").html(contenido_append);
+             $("#tarjeta_usuario").show("slow"); 
+             
+
+           }
+           , error: function(data)
+           {
+            contador_solicitudes++;
+            if(contador_solicitudes<cantidad_maxima_solicitudes)
+               llenar_usuario();                
+           }
+         }
+      
+         $.ajax(settings);
+      }    
+
+
+
+
+
+
+
+      
+    
+
+      
+   </script>   
+   <body>
+      <div class="container-fluid" >
+      <div class="row" id="encabezado">
+      </div>
+      <div class="row">
+         <div class="col-12 col-lg-2 panel_menu" id="menu"> 
+         </div>
+         <!-- Contenido de la página --> 
+         <div id="contenido_de_pagina" class="col-12 col-lg-10 contenido_de_pagina">
+            <div class="row">
+               <div class="col-12 col-xl-8 form-group" id="div_informacion_general">
+                  <div class="row div_row_tarjeta">
+                     <div class="col-12 div_tarjeta_arriba_encabezado">
+                        Información General 
+                     </div>
+                     <div class="col-12 div_tarjeta_abajo_contenido">
+                        <div class="row" id="tarjeta_usuario">
+
+                        </div>
+                     </div>
+                  </div>
+               </div>
+               <div id="div_nivel_de_usuario" class="col-12 col-xl-4 form-group div_tarjeta_abajo_contenido" style="border-top-right-radius: 30px;border-top-left-radius: 30px; padding-left: 15px;padding-right: 15px;">
+                  <div class="row" id="tarjeta_nivel">
+
+                  </div>
+               </div>
+               <div class="col-12 col-xl-12 form-group" style="display: none; ">
+                  <div class="row div_row_tarjeta" style="padding-right: 0px;">
+                     <div class="col-12 div_tarjeta_arriba_encabezado">
+                        Inventario de Mascotas
+                     </div>
+                     <div class="col-12 div_tarjeta_abajo_contenido">
+                        <div class="row form-group" id="inventario_de_mascotas">
+                          <table style="width: 100%;margin-top: 15px;">
+                            <tr class="tr_no_hover" style="border-bottom-left-radius: 40px;">
+                              <th class="th_left" style="width: 30%;">Cliente</th>
+                              <th style="width: 30%">Correo</th>
+                              <th style="width: 20%">Celular</th>
+                              <th class="th_right" style="width: 20%">Fecha de Nacimiento</th>
+                            </tr>
+                            <tr onclick="window.location.href='../clientes/perfil_de_cliente.html?id=${obj[x]["id"]}'">
+                              <td>Cliente</td>
+                              <td>Email</td>
+                              <td>Teléfono celular</td>
+                              <td>Fecha de nacimiento</td>
+                            </tr>
+                          </table>
+                        </div>                                                
+                        <div class="row form-group">
+                            <div class="col-12 col-xl-9"></div>
+                              <div class="col-12 col-xl-3 btn_rectangle" onclick="window.location.href=`../usuarios/ver_existencias_de_mascotas.html?id_search_user=${getValueFromUrl('id')}`">
+                                Ver Todo
+                              </div>
+                            </div>
+                          </div> 
+                     </div>
+                  </div>
+               </div>               
+               <div id="div_certificados" class="col-12 col-xl-12 form-group">
+                  <div class="row div_row_tarjeta" style="padding-right: 0px;">
+                     <div class="col-12 div_tarjeta_arriba_encabezado">
+                        Certificados
+                     </div>
+                     <div class="col-12 div_tarjeta_abajo_contenido">
+                        <div class="row form-group" id="tabla_clientes" style="padding-top: 15px; ">
+                        </div>                        
+                        <div class="row form-group" id="cuenta_clientes" style="font-size: 25px; text-align: center;margin-top: 30px;">
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </body>
+</html>

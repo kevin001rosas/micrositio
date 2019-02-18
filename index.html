@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+   <head>
+      <!-- Required meta tags -->
+      <meta charset="utf-8">
+      
+      <!-- Bootstrap CSS -->
+      
+      <!-- Latest compiled and minified CSS -->
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
+
+      <!-- jQuery library -->
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+      <!-- Popper JS -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"></script>
+
+      <!-- Latest compiled JavaScript -->
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+
+      <title>48 Horas</title>
+      <link href="https://fonts.googleapis.com/css?family=Work+Sans" rel="stylesheet">
+
+      <!--Cargamos los íconos-->
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+      
+
+      <!-- Latest compiled and minified CSS -->
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/css/bootstrap-select.min.css">
+
+      <!-- Latest compiled and minified JavaScript -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/js/bootstrap-select.min.js"></script>
+
+      <script src="./js/cookie.js"></script>
+      <script src="./js/utilidades.js"></script>      
+      <link rel="stylesheet" href="./css/estilos.css">
+      <div id="loading"></div>
+      <script>
+        $(document).ready(function() {
+          quitar_loading(); 
+          //incluir_logo();           
+        });
+
+        function incluir_logo()
+        {
+          $("#logo_login").attr("src", `${base_url}/images/royal_canin_logo_02.jpg`);
+          return; 
+        }
+
+        function preparar_recuperar_contraseña()
+        {
+          $("#div_recuperar_contrasenia").show('slow');
+          return; 
+        }
+
+        function recuperar_contrasenia()
+        {
+          $("#mensaje_contrasenia").hide();
+
+          if(correo_valido($("#email_restablecimiento").val())==false)
+          {
+            $("#mensaje_contrasenia").html("Por favor, especifica una dirección de correo válida.")            
+            $("#mensaje_contrasenia").show("slow");
+            return; 
+          }
+
+          //Solicitamos la contraseña por AJAX. 
+        var settings = {
+           "async": false,
+           "crossDomain": true,
+           "url": `${api_url}/usuarios/getSecret`, 
+           "method": "GET",
+           "headers": {
+             "Content-Type": "application/json",
+             "cache-control": "no-cache",
+             "email": `${$("#email_restablecimiento").val()}`
+           },
+           "processData": false,                      
+            success: function(data){    
+            
+             //Mostramos el mensaje del servidor en la interfaz. 
+             $("#email_restablecimiento").val("");
+             $("#email_restablecimiento").focus(); 
+             $("#mensaje_contrasenia").html(data);
+
+           }
+           , error: function(data)
+           {
+            $("#mensaje_contrasenia").html("No se ha posido establecer la conexión con el servidor.");
+            return; 
+           }
+         }
+      
+         $.ajax(settings);          
+
+
+          $("#mensaje_contrasenia").show('slow');
+
+        }
+      </script>
+      
+   </head>
+   <body style="background-color: #E2001A;">
+      <div class="container-fluid">
+         <div class="row" style="padding-top: 20vh;">
+           <div class="col-2 col-xl-3"></div>
+            <div class="col-8 col-xl-6" style="background-color: white;border-radius: 50px;padding-top: 5vh; padding-bottom: 5vh;">
+              <div class="row">
+                <div class="col-12" style="text-align: center;margin-bottom: 5vh;">
+                  <img id="logo_login" src='http://localhost/48_horas/images/royal_canin_logo_02.jpg' style='height: auto; width:70%;'>
+                </div>                
+              </div>
+              <div class="row">
+                <div class="col-12 letra_encabezado_naranja" style="text-align: center;padding-bottom: 15px;">Inicio de sesión</div>
+              </div>
+              <div class="row justify-content-center">
+                <div class="col-10 form-group">
+                  <input type="text" class="form-control" id="email" style="text-align: center;" placeholder="Correo">
+                </div>
+              </div>
+              <div class="row justify-content-center">
+                <div class="col-10 form-group">
+                  <input type="password" class="form-control" id="secret" style="text-align: center;" placeholder="Contraseña">
+                </div>
+              </div>
+              <div class="row justify-content-center">
+                <div id="errores" class="col-10 form-group tamanio_letra_errores" style="display: none;">
+                  ERROR
+                </div>
+              </div>              
+              <div class="row justify-content-center">
+                <div class="col-10 form-group">                  
+                  <div class="btn_rectangle" onclick="iniciar_sesion();">Continuar</div>
+                </div>
+              </div>
+              <div class="row justify-content-center">
+                <div onclick="preparar_recuperar_contraseña()" class="col-10 form-group button_label" style="text-align: right;">
+                Recuperar contraseña
+                </div>
+              </div>              
+
+              <div class="row justify-content-center" id="div_recuperar_contrasenia" style="display:none;">
+                <div class="col-10 form-group">
+                <div class="row">
+                  <div class="col-12 form-group">
+                    <input type="text" class="form-control" id="email_restablecimiento" style="text-align: center;" placeholder="Correo">
+                  </div>
+                  <div class="col-12 form-group">
+                    <div class="btn_rectangle" onclick="recuperar_contrasenia();">Recuperar</div>
+                  </div>
+                  <div id="mensaje_contrasenia" class="col-12 error" style="font-size: 20px;font-weight: bold;text-align: center;display: none;">                    
+                  </div>
+                </div>
+                </div>
+              </div>                                         
+              </div>
+              
+            </div>            
+         </div>
+      </div>
+   </body>
+</html>

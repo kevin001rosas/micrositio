@@ -1,0 +1,540 @@
+
+<!doctype html>
+<html lang="en">
+   <head>
+      <!-- Required meta tags -->
+      <meta charset="utf-8">
+      
+      <!-- Bootstrap CSS -->
+      <!-- Latest compiled and minified CSS -->
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
+      <!-- jQuery library -->
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+      <!-- Popper JS -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"></script>
+      <!-- Latest compiled JavaScript -->
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+      <title>48 Horas</title>
+      <link href="https://fonts.googleapis.com/css?family=Work+Sans" rel="stylesheet">
+      <!--Cargamos los íconos-->
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+      <!-- Latest compiled and minified CSS -->
+      <link rel="stylesheet" href="../../css/bootstrap-select.css">
+      <!-- Latest compiled and minified JavaScript -->
+      <script src="../../js/bootstrap-select.js"></script>
+      <script src="../../js/cookie.js"></script>
+      <script src="../../js/utilidades.js"></script>      
+      <link rel="stylesheet" href="../../css/estilos.css">
+   </head>
+<div id="loading"></div>
+   <script>
+      var cliente = {};   
+
+      var url_foto = ""; 
+
+      $(document).ready(function() {
+       llenar_menu(); 
+       llenar_encabezado();        
+       llenar_comboboxes(); 
+       llenar_datos();        
+        $("#button_ver_clientes" ).addClass("active");
+        $("#foto_url").hover(poner_hover_foto, quitar_hover_foto);
+       quitar_loading(); 
+       return; 
+      });
+
+      function validacion()
+      {      
+        $("#errores").hide(); 
+        $('html,body').animate({
+                       scrollTop: $("#errores").offset().top},'slow');
+
+        if($("#nombres").val().trim()==="") 
+        {
+          $("#errores").html("Por favor, especifica un nombre para el dueño de mascota."); 
+          $("#errores").show("slow");              
+          return false; 
+        }
+        if($("#apellido_paterno").val().trim()==="") 
+        {
+          $("#errores").html("Por favor, especifica un apellido paterno para el dueño de mascota."); 
+          $("#errores").show("slow");              
+          return false; 
+        }
+        if($("#apellido_materno").val().trim()==="") 
+        {
+          $("#errores").html("Por favor, especifica un apellido materno para el dueño de mascota."); 
+          $("#errores").show("slow");              
+          return false; 
+        }
+        if($("#telefono_local").val().trim()==="") 
+        {
+          $("#errores").html("Por favor, especifica un teléfono local para el dueño de mascota."); 
+          $("#errores").show("slow");              
+          return false; 
+        }
+        if($("#telefono_celular").val().trim()==="") 
+        {
+          $("#errores").html("Por favor, especifica un teléfono celular para el dueño de mascota."); 
+          $("#errores").show("slow");              
+          return false; 
+        }
+        if($("#email").val().trim()==="") 
+        {
+          $("#errores").html("Por favor, especifica un email para el dueño de mascota."); 
+          $("#errores").show("slow");              
+          return false; 
+        }
+        
+        if($("#delegacion").val().trim()==="") 
+        {
+          $("#errores").html("Por favor, especifica una delegación para el dueño de mascota."); 
+          $("#errores").show("slow");              
+          return false; 
+        }
+        if($("#colonia").val().trim()==="") 
+        {
+          $("#errores").html("Por favor, especifica una colonia para el dueño de mascota."); 
+          $("#errores").show("slow");              
+          return false; 
+        }
+        if($("#calle").val().trim()==="") 
+        {
+          $("#errores").html("Por favor, especifica una calle para el dueño de mascota."); 
+          $("#errores").show("slow");              
+          return false; 
+        }
+        if($("#numero").val().trim()==="") 
+        {
+          $("#errores").html("Por favor, especifica un número de calle para el dueño de mascota."); 
+          $("#errores").show("slow");              
+          return false; 
+        }
+
+        if(telefono_local_valido($("#telefono_local").val())==false)
+        {
+          //Hacemos el append de los errores y mostramos los errores.
+          $("#errores").html("El teléfono local debe ser de 8 dígitos."); 
+          $("#errores").show("slow");    
+          return false; 
+        }
+        if(telefono_celular_valido($("#telefono_celular").val())==false)
+        {
+          //Hacemos el append de los errores y mostramos los errores.
+          $("#errores").html("El teléfono celular debe ser de 10 dígitos."); 
+          $("#errores").show("slow");    
+          return false; 
+        }        
+
+        if(correo_valido($("#email").val())==false)
+        {
+          //Hacemos el append de los errores y mostramos los errores.
+          $("#errores").html("El correo electrónico no es válido."); 
+          $("#errores").show("slow");    
+          return false; 
+        }        
+        if(cliente.email!=$("#email").val())
+        {
+          if(correo_cliente_inexistente($("#email").val())==false) 
+          {
+            $("#errores").html("El correo especificado ya pertenece a otro cliente."); 
+            $("#errores").show("slow");              
+            return false; 
+          }
+
+          if(correo_usuario_inexistente($("#email").val())==false) 
+          {
+            $("#errores").html("El correo especificado pertenece a un usuario."); 
+            $("#errores").show("slow");              
+            return false; 
+          }    
+        }
+
+        return true; 
+
+
+      }
+
+      function actualizar()
+      {
+        if(validacion()==false)
+          return; 
+         //Modificamos la raza con Ajax. 
+         var form = {};
+                  
+
+        form.nombres = $("#nombres").val();
+        form.apellido_paterno = $("#apellido_paterno").val();
+        form.apellido_materno = $("#apellido_materno").val();
+        form.telefono_local = $("#telefono_local").val();
+        form.telefono_celular = $("#telefono_celular").val();
+        form.calle = $("#calle").val();
+        form.codigo_postal = $("#codigo_postal").val();
+        form.numero = $("#numero").val();
+        form.delegacion = $("#delegacion").val();
+        form.colonia = $("#colonia").val();
+        form.fecha_de_nacimiento = $("#fecha_de_nacimiento").val();
+        form.id_ciudad = $("#id_ciudad").val();
+        form.email = $("#email").val();
+        form.estado = $("#estado").val();        
+        form.foto_url = cliente.foto_url;
+        form.id_registrado_por = cliente.id_registrado_por;
+        form.id_estado = $("#id_estado").val();
+        console.log(form); 
+
+         var settings = {
+           "async": false,
+           "crossDomain": true,
+           "url": `${api_url}/clientes/${getIdFromURL()}`, 
+           "method": "POST",
+           "headers": {
+             "Content-Type": "application/json",
+             "cache-control": "no-cache",
+             "token": `${Cookies.get('token')}`, 
+             "id_usuario": `${Cookies.get('id_usuario')}`
+           },
+           "processData": false,
+           "data": JSON.stringify(form)
+         }
+      
+         $.ajax(settings).done(function (response) {
+           //Regresamos a la ventana para ver los tipos de mascota. 
+           window.location.href = `${base_url}/vistas/clientes/perfil_de_cliente.html?id=${getIdFromURL("id")}`;
+         });         
+      }      
+
+      function llenar_datos()
+      {
+
+       //Obtenemos la información del id.
+       var id = getIdFromURL();      
+
+         var settings = {
+           "async": false,
+           "crossDomain": true,
+           "url": `${api_url}/clientes/${id}`, 
+           "method": "GET",
+           "headers": {
+             "Content-Type": "application/json",
+             "cache-control": "no-cache",
+             "token": `${Cookies.get('token')}`, 
+             "id_usuario": `${Cookies.get('id_usuario')}`
+           },
+           "processData": false,                                 
+            success: function(data){                
+            //Parseamos la información. 
+             var obj = JSON.parse(data);                    
+
+             //Guardamos el objeto de mascota. 
+              cliente.nombres = obj[0]["nombres"]; 
+              cliente.apellido_paterno = obj[0]["apellido_paterno"]; 
+              cliente.apellido_materno = obj[0]["apellido_materno"]; 
+              cliente.telefono_local = obj[0]["telefono_local"]; 
+              cliente.telefono_celular = obj[0]["telefono_celular"]; 
+              cliente.calle = obj[0]["calle"]; 
+              cliente.codigo_postal = obj[0]["codigo_postal"]; 
+              cliente.numero = obj[0]["numero"]; 
+              cliente.delegacion = obj[0]["delegacion"]; 
+              cliente.colonia = obj[0]["colonia"]; 
+              cliente.fecha_de_nacimiento = obj[0]["fecha_de_nacimiento"]; 
+              cliente.id_ciudad = obj[0]["id_ciudad"]; 
+              cliente.email = obj[0]["email"]; 
+              cliente.estado = obj[0]["estado"]; 
+              cliente.id_estado = obj[0]["id_estado"]; 
+              cliente.id_registrado_por = obj[0]["id_registrado_por"]; 
+              cliente.foto_url = obj[0]["foto_url"]; 
+              cliente.id_estado = obj[0]["id_estado"]; 
+              cliente.fecha_de_registro = obj[0]["fecha_de_registro"]; 
+              cliente.fecha_de_modificacion = obj[0]["fecha_de_modificacion"]; 
+             
+             //Fijamos el nombre de la raza. 
+              $("#nombres").val(obj[0]["nombres"]); 
+              $("#apellido_paterno").val(obj[0]["apellido_paterno"]); 
+              $("#apellido_materno").val(obj[0]["apellido_materno"]); 
+              $("#telefono_local").val(obj[0]["telefono_local"]); 
+              $("#telefono_celular").val(obj[0]["telefono_celular"]); 
+              $("#calle").val(obj[0]["calle"]); 
+              $("#codigo_postal").val(obj[0]["codigo_postal"]); 
+              $("#numero").val(obj[0]["numero"]); 
+              $("#delegacion").val(obj[0]["delegacion"]); 
+              $("#colonia").val(obj[0]["colonia"]); 
+              $("#fecha_de_nacimiento").val(obj[0]["fecha_de_nacimiento"]);            
+              $("#email").val(obj[0]["email"]); 
+              $("#estado").val(obj[0]["estado"]); 
+              $("#id_tipo_de_usuario").val(obj[0]["id_tipo_de_usuario"]); 
+              $("#id_registrado_por").val(obj[0]["id_registrado_por"]); 
+              $("#foto_url").val(obj[0]["foto_url"]);               
+              $("#fecha_de_registro").val(obj[0]["fecha_de_registro"]); 
+              $("#fecha_de_modificacion").val(obj[0]["fecha_de_modificacion"]); 
+
+              //Actualizamos la ciudad. 
+              $('#id_ciudad').selectpicker('val', obj[0]["id_ciudad"]);
+              $("#id_ciudad").selectpicker('refresh'); 
+
+              //Actualizamos el estado del cliente (Activo o Inactivo)
+              $('#id_estado').selectpicker('val', obj[0]["id_estado"]);
+              $("#id_estado").selectpicker('refresh'); 
+
+              
+              
+
+              //Validamos que exista una imagen. Sino, ponemos la default. 
+              isUrlExists(obj[0]["foto_url"], function(status){
+                    if(status === 200){
+                       // file was found                   
+                    }
+                    else if(status === 404){
+                       // 404 not found
+                       obj[0]["foto_url"] = default_image_url;                       
+                    }
+                });
+              url_foto = obj[0]["foto_url"];              
+              $("#foto_url").attr('src', url_foto);
+              
+
+              
+           }
+           , error: function() {
+               //Volvemos a invocar la función. 
+               if(contador_solicitudes<cantidad_maxima_solicitudes)
+               llenar_datos();                
+            }
+         }
+      
+         $.ajax(settings);
+             
+      }
+
+
+      function poner_hover_foto()
+      {
+        //alert("Entra"); 
+        //Ponemos el imagen de preview. 
+        $("#foto_url").attr('src', default_image_url);        
+      }
+
+      function quitar_hover_foto()
+      {
+        //Quitamos la imagen del preview. 
+        //alert("Sale"); 
+        $("#foto_url").attr('src', url_foto);        
+        
+      }      
+      
+            
+      function llenar_comboboxes()
+      {
+        llenar_ciudades(); 
+        llenar_estado_de_cliente(); 
+      }
+      
+      function llenar_ciudades()
+      {
+        contador_solicitudes++;
+        var settings = {
+           "async": false,
+           "crossDomain": true,
+           "url": `${api_url}/ciudades`, 
+           "method": "GET",
+           "headers": {
+             "Content-Type": "application/json",
+             "cache-control": "no-cache",
+             "token": `${Cookies.get('token')}`, 
+             "id_usuario": `${Cookies.get('id_usuario')}`
+           },
+           "processData": false,                      
+            success: function(data){    
+            //console.log(data); 
+            //Parseamos la información. 
+             var obj = JSON.parse(data);                
+      
+             
+      
+             //Limpiamos el contenido actual 
+             $("#id_ciudad").html("");
+             var nuevo_contenido = ""; 
+      
+             //Llenamos las nuevas opciones. 
+             for (var x =  0; x < obj.length; x++) 
+             {
+               var id = obj[x]["id"]; 
+               var nombre = obj[x]["nombre"];                
+               nuevo_contenido += `<option value="${id}">${nombre}</option>`; 
+             }
+      
+             $("#id_ciudad").html(nuevo_contenido);   
+             //Seleccinamos la primera opción 
+             $('#id_ciudad').selectpicker('val', $("#id_ciudad option:first").val());
+             $("#id_ciudad").selectpicker('refresh'); 
+           }
+           , error: function() {
+               //Volvemos a invocar la función. 
+               if(contador_solicitudes<cantidad_maxima_solicitudes)
+               llenar_ciudades();                
+            }
+         }
+      
+         $.ajax(settings);         
+      }
+      
+      function llenar_estado_de_cliente()
+      {
+        contador_solicitudes++; 
+        var settings = {
+           "async": false,
+           "crossDomain": true,
+           "url": `${api_url}/estadosdecliente`, 
+           "method": "GET",
+           "headers": {
+             "Content-Type": "application/json",
+             "cache-control": "no-cache",
+             "token": `${Cookies.get('token')}`, 
+             "id_usuario": `${Cookies.get('id_usuario')}`
+           },
+           "processData": false,              
+            success: function(data){    
+            //console.log(data); 
+            //Parseamos la información. 
+             var obj = JSON.parse(data);        
+      
+             //Limpiamos el contenido actual 
+             $("#id_estado").html("");
+             var nuevo_contenido = ""; 
+      
+             //Llenamos las nuevas opciones. 
+             for (var x =  0; x < obj.length; x++) 
+             {
+               var id = obj[x]["id"]; 
+               var nombre = obj[x]["nombre"];                
+               nuevo_contenido += `<option value="${id}">${nombre}</option>`; 
+             }
+      
+             $("#id_estado").html(nuevo_contenido);   
+             //Seleccinamos la primera opción
+             $('#id_estado').selectpicker('val', $("#id_estado option:first").val());
+             $("#id_estado").selectpicker('refresh'); 
+           }
+            , error: function(data) {
+               //Volvemos a invocar la función. 
+               if(contador_solicitudes<7)
+                llenar_tipos_de_usuario();                
+            }
+         }
+      
+         $.ajax(settings);         
+      }
+      
+      
+      
+   </script>
+   <style>
+   </style>
+   <body>
+      <div class="container-fluid" >
+      <div class="row" id="encabezado">
+      </div>
+      <div class="row">
+         <div class="col-12 col-lg-2 panel_menu" id="menu"> 
+         </div>
+         <!-- Contenido de la página --> 
+         <div id="contenido_de_pagina" class="col-12 col-lg-10 contenido_de_pagina">
+            <div class="row">
+               <div class="col-12 col-xl-12 form-group">
+                  <div class="row div_row_tarjeta">
+                     <div class="col-12 div_tarjeta_arriba_encabezado">
+                        Datos de Dueño de Mascota 
+                     </div>
+                     <div class="col-12 div_tarjeta_abajo_contenido">
+                        <div class="row tamanio_letra_estandar">
+                           <div class="col-12 form-group"></div>
+                           <div class="col-12">
+                              <div class="row">
+                                 <div class="col-12 col-xl-7">
+                                    <div class="row form-group">
+                                       <div class="col-3 label_campo" style="text-align: right;">Nombres:</div>
+                                       <input type="text" id="nombres" class="col-9 form-control" placeholder="Nombres"/>    
+                                    </div>
+                                    <div class="row form-group">
+                                       <div class="col-3 label_campo" style="text-align: right;">Apellido Paterno:</div>
+                                       <input type="text" id="apellido_paterno" class="col-9 form-control" placeholder="Apellido Paterno"/>    
+                                    </div>
+                                    <div class="row form-group">
+                                       <div class="col-3 label_campo" style="text-align: right;">Apellido Materno:</div>
+                                       <input type="text" id="apellido_materno" class="col-9 form-control" placeholder="Apellido Materno"/>    
+                                    </div>
+                                    <div class="row form-group">
+                                       <div class="col-3 label_campo" style="text-align: right;">Teléfono Local:</div>
+                                       <input type="text" id="telefono_local" class="col-9 form-control" placeholder="Teléfono Local"/>    
+                                    </div>
+                                    <div class="row form-group">
+                                       <div class="col-3 label_campo" style="text-align: right;">Teléfono Celular:</div>
+                                       <input type="text" id="telefono_celular" class="col-9 form-control" placeholder="Teléfono Celular"/>    
+                                    </div>
+                                    <div class="row form-group">
+                                       <div class="col-3 label_campo" style="text-align: right;">Email:</div>
+                                       <input type="text" id="email" class="col-9 form-control" placeholder="Email"/>    
+                                    </div>                                    
+                                    <div class="row form-group">
+                                       <div class="col-3 label_campo" style="text-align: right;">Estado:</div>
+                                       <select id="id_estado" class="col-9 form-control selectpicker" placeholder="Estado"></select>
+                                    </div>
+                                    <div class="row form-group">
+                                       <div class="col-3 label_campo" style="text-align: right;">Fecha de Nacimiento:</div>
+                                       <input type="date" id="fecha_de_nacimiento" class="col-9 form-control" placeholder="fecha_de_nacimiento"/>
+                                    </div>
+                                 </div>
+                                 
+                                  <div class="col-12 col-lg-5" style="text-align: center;">
+                                        <img id="foto_url" class="button_imagen" src='' style='cursor: pointer;height:450px;width: auto; padding-top: 15px; '>
+                                 </div>
+                                 
+                              </div>
+                              <div class="row form-group">
+                                <div id="errores" style="display: none;" class="col-12 tamanio_letra_errores">Errores</div>
+                              </div>
+
+                           </div>
+                           <div class="col-12">
+                              <div class="row form-group">
+                                 <div class="col-12 letra_encabezado_naranja">Dirección:</div>
+                              </div>
+                              <div class="row form-group">
+                                 <div class="col-6">
+                                    <div class="row form-group">
+                                       <div class="col-3 label_campo" style="text-align: right;">Ciudad:</div>
+                                       <select id="id_ciudad" class="col-9 form-control selectpicker" placeholder="Ciudad"></select>
+                                    </div>
+                                    <div class="row form-group">
+                                       <div class="col-3 label_campo" style="text-align: right;">Delegación:</div>
+                                       <input type="text" id="delegacion" class="col-9 form-control" placeholder="Delegación"/>    
+                                    </div>
+                                    <div class="row form-group">
+                                       <div class="col-3 label_campo" style="text-align: right;">Colonia:</div>
+                                       <input type="text" id="colonia" class="col-9 form-control" placeholder="Colonia"/>    
+                                    </div>
+                                 </div>
+                                 <div class="col-6">
+                                    <div class="row form-group">
+                                       <div class="col-3 label_campo" style="text-align: right;">Calle:</div>
+                                       <input type="text" id="calle" class="col-9 form-control" placeholder="Calle"/>    
+                                    </div>
+                                    <div class="row form-group">
+                                       <div class="col-3 label_campo" style="text-align: right;">Número:</div>
+                                       <input type="text" id="numero" class="col-9 form-control" placeholder="Número"/>    
+                                    </div>
+                                    <div class="row form-group">
+                                       <div class="col-3"></div>
+                                       <div class="col-9 btn_rectangle" onclick="actualizar()">Guardar Cambios</div>
+                                    </div>
+                                 </div>
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </body>
+</html>

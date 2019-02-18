@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+   <head>
+      <!-- Required meta tags -->
+      <meta charset="utf-8">
+      
+      <!-- Bootstrap CSS -->
+      
+      <!-- Latest compiled and minified CSS -->
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
+
+      <!-- jQuery library -->
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+      <!-- Popper JS -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"></script>
+
+      <!-- Latest compiled JavaScript -->
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+
+      <title>48 Horas</title>
+      <link href="https://fonts.googleapis.com/css?family=Work+Sans" rel="stylesheet">
+
+      <!--Cargamos los íconos-->
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+      
+
+      <!-- Latest compiled and minified CSS -->
+      <link rel="stylesheet" href="../../css/bootstrap-select.css">
+
+      <!-- Latest compiled and minified JavaScript -->
+      <script src="../../js/bootstrap-select.js"></script>
+
+      <script src="../../js/cookie.js"></script>
+      <script src="../../js/utilidades.js"></script>      
+      <link rel="stylesheet" href="../../css/estilos.css">
+      
+   </head>
+<div id="loading"></div>
+   <script>
+      var url_foto = ""; 
+      $(document).ready(function() {        
+       llenar_menu(); 
+       llenar_encabezado(); 
+       llenar_datos(); 
+       //llenar_comboboxes(); 
+        //llenar_datos();                   
+        $("#button_ver_clientes").addClass("active");
+        configurar_eventos_de_busqueda(); 
+      });
+
+      function configurar_eventos_de_busqueda()
+      {
+        $( "#nombre_busqueda" ).keydown(function(e) {
+          if (e.keyCode == 13) {
+            pagina_actual=1; 
+            llenar_datos(); 
+          }
+        });
+      }
+
+      function llenar_datos()
+      { 
+        var settings = {
+           "async": false,
+           "crossDomain": true,
+           "url": `${api_url}/clientes/getSearchByPage`, 
+           "method": "GET",
+           "headers": {
+             "Content-Type": "application/json",
+             "cache-control": "no-cache",
+             "token": `${Cookies.get('token')}`, 
+             "id_usuario": `${Cookies.get('id_usuario')}`,
+"id_tipo_de_usuario": `${Cookies.get('id_tipo_de_usuario')}`, 
+             "id_search_user": `${getValueFromUrl("id_search_user")}`, 
+             "pagina": `${pagina_actual}`, 
+             "nombre": `${$("#nombre_busqueda").val()}`
+           },
+           "processData": false,                      
+            success: function(data){    
+              console.log(data); 
+              
+            //Limpiamos el contenido de las clientes.
+            $("#tarjetas").hide("slow"); 
+            $("#tarjetas").html("");               
+            //Parseamos la información. 
+             var obj = JSON.parse(data);   
+             console.log(data); 
+      
+             var contenido_append = ""; 
+             cantidad_elementos_en_pagina = obj.length; 
+
+      
+             //Cambiamos el valor actual del id para preparar el update  
+             for (var x =  0; x < obj.length; x++)
+             {
+              //No mostramos el último elemento. (Solo en caso de que este la página llena)
+              if((x==obj.length-1) && (obj.length-1==cantidad_elementos_por_pagina))
+                continue;
+
+              //Validamos que exista una imagen. Sino, ponemos la default.               
+              var image = new Image(); 
+              image.src = obj[x]["foto_url"];
+              if (image.width == 0) {
+                obj[x]["foto_url"] = default_image_url;                            
+              }
+
+              console.log(default_image_url); 
+              
+
+              //$("#nombre").val(obj[0]["nombre_raza"]);
+               contenido_append += 
+               `<div class='col-12 col-xl-6 form-group'>
+                                <div class='row div_row_tarjeta_lista' onclick="window.location.href='./perfil_de_cliente.html?id=${obj[x]["id"]}'">
+                                    <div class='col-12 div_tarjeta_arriba_contenido'>
+                                        <div class='row'>
+                                            <div class='col-12 col-md-3' style='text-align:center;' >
+                                                <div class="row" style="height: 100%;">
+                                                  <div class="col-12" style="margin-top: auto; margin-bottom: auto;">
+                                                    <div class="row">
+                                                      <div class="col-12">
+                                                        <div class="circulo_cuenta" style="">
+                                                              ${obj[x]["mascotas"]}
+                                                        </div>
+                                                      </div>
+                                                      <div class="col-12 label_circulo_cuenta">
+                                                        Mascota(s)                                
+                                                      </div>
+                                                    </div>
+                                                  </div>                                                  
+                                                </div>
+                                            </div>           
+                                            <div class='col-12 col-md-9 form-group' style='padding-top: 20px; padding-left: 30px;'>
+                                                <div class='row form-group'>
+                                                    <div class='col-12 espaciado_estrecho' style="font-size: 23px;font-weight: 700;">${obj[x]["cliente"]}</div>
+                                                    <div class='col-12 espaciado_estrecho form-group tamanio_letra_estandar'>
+                                                      ${obj[x]["ciudad"]}
+                                                    </div>
+                                                    <div class='col-12 espaciado_estrecho form-group tamanio_letra_estandar'>
+                                                      ${obj[x]["delegacion"]}
+                                                    </div>
+                                                    <div class='col-12 espaciado_estrecho form-group tamanio_letra_estandar'>
+                                                      ${obj[x]["email"]}
+                                                    </div>                                                    
+                                                </div>
+                                                <div class="row">
+                                                    <div class='col-12 espaciado_estrecho tamanio_letra_estandar'>
+                                                      <b>Teléfono Celular:</b>
+                                                    </div>
+                                                    <div class='col-12 espaciado_estrecho form-group tamanio_letra_estandar'>
+                                                      +55 1394 2392
+                                                    </div>
+                                                </div>
+                                            </div>           
+                                            <div style='position: absolute; display:none;text-align:right;right: 10px; top:10px;'>
+                                                <span style='color: green;font-weight: bold;'>Aqui va es esatdo de mascota</span>
+                                                <img src='http://localhost/48_horas/images/camera.png' style='height: 30px; width:auto;margin-top: -2px; '>
+                                            </div>                                            
+                                        </div>
+                                    </div>
+                                    <div class='col-12 div_tarjeta_abajo_button' onclick="window.location.href='./perfil_de_cliente.html?id=${obj[x]["id"]}'">
+                                        Ver
+                                    </div>
+                                </div>                                
+                              </div>`;
+             }
+
+      
+             $("#tarjetas").html(contenido_append);
+             $("#tarjetas").show("slow"); 
+             llenar_paginacion(); 
+
+           }
+           , error: function(data)
+           {
+            alert("No se encontraron resultados"); 
+            return; 
+           }
+         }
+      
+         $.ajax(settings);
+      }
+
+
+      function llenar_paginacion()
+      {
+        var append_paginacion = ""; 
+        
+        var append_paginacion = `<div class="col-12" style="text-align: right;">`; 
+
+        //En caso de ser la página 1, no mostramos la fecha de anterior. 
+        if(pagina_actual!=1)
+        {
+          append_paginacion += `<div class="button_paginacion" data-pagina="${pagina_actual-1}" onclick="actualizar_pagina(this);"><</div>`; 
+
+        }
+
+
+        //Si hay mas élementos en la página, debemos cargar el siguiente. 
+        if(cantidad_elementos_en_pagina>cantidad_elementos_por_pagina)
+        {
+          append_paginacion += `<div class="button_paginacion" data-pagina="${pagina_actual+1}" onclick="actualizar_pagina(this);">></div>`;      
+        }
+
+        append_paginacion+= `</div>`; 
+                          
+        $("#paginacion").html(append_paginacion); 
+      }
+
+      function actualizar_pagina(boton)
+      { 
+        pagina_actual = parseInt(boton.dataset.pagina);        
+        //Hacemos solicitud a clientes/get_by_page/1 En caso de no existir un filtro guardado.
+        llenar_datos(); 
+
+        //Hacemos solicitud a clientes/search/1 En caso de existir un filtro guardado. 
+      }
+
+
+
+
+
+
+   </script>
+   <style>
+   </style>
+   <body>
+      <div class="container-fluid" >
+         <div class="row" id="encabezado">
+         </div>
+         <div class="row">
+            <div class="col-12 col-lg-2 panel_menu" id="menu"> 
+            </div>
+            <!-- Contenido de la página --> 
+            <div id="contenido_de_pagina" class="col-12 col-lg-10 contenido_de_pagina" >
+                  <div class="row" style="padding-left: 20px;padding-right: 20px;">
+                    <div class="col-12">
+                        <div class="row form-group">                            
+                            <div class="col-12 col-xl-8 form-group">
+                              <input type="text" id="nombre_busqueda" class="input_white form-control" placeholder="Buscar por nombre o apellido..."/>
+                            </div>
+                            <div class="col-xl-3 col-12 form-group">
+                              <div class="btn_rectangle_secundario" onclick="window.location.href='./crear_cliente.html'">Registrar Cliente</div>
+                            </div>
+                            <div class="col-12 col-xl-1 form-group" style="text-align: left; ">
+                              <img class="button_icon" src='http://localhost/48_horas/images/excel.png' style='height: 40px; width:auto;'>
+                            </div>
+                        </div>                         
+                    </div>
+                    <div class="col-12">
+                        <div class="row" id="tarjetas">
+
+                        </div>
+                        <div class="row" id="paginacion">
+                          
+                        </div>
+                    </div>
+                  </div>
+            </div>
+          </div>         
+   </body>
+</html>

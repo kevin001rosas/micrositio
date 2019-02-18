@@ -1,0 +1,587 @@
+    body
+    {
+     font-family: 'Work Sans', sans-serif;  
+     background-color: white;            
+    }
+
+    
+    .letra_perfil_encabezado
+    {
+        color:white; 
+        font-size:25px; 
+        font-weight:600;
+    }
+
+    .letra_terminos_y_condiciones
+    {
+        font-size: 20px; 
+        text-align: justify;
+    }
+
+    .letra_encabezado_naranja
+    {   
+        color: #E2001A; 
+        font-size: 25px; 
+        font-weight: 700;
+    }
+
+    .tamanio_letra_estandar
+    {
+        font-size: 20px; 
+    }
+
+    .tamanio_letra_errores
+    {
+        font-size: 25px; 
+        color: #E2001A; 
+    }    
+    .fondo_perfil_encabezado
+    {
+        border-bottom-left-radius: 60px;
+        border-top-left-radius: 60px;
+        background-color: #E2001A;
+        text-align: right;                
+    }
+    .espaciado_normal
+    {
+        margin-bottom: 10px;        
+    }
+
+
+    .espaciado_estrecho
+    {
+        margin-bottom: 1px;   
+    }
+
+    .div_tarjeta_abajo_button
+    {
+        border-bottom-left-radius: 30px;
+        border-bottom-right-radius: 30px;
+        background-color: #E2001A;
+        color:white;text-align: center;
+        padding-top: 7px; 
+        font-size: 25px; 
+        min-height: 50px;
+        transition: .2s; 
+    }
+    .div_tarjeta_abajo_button:hover
+    {
+        cursor: pointer;
+        font-size: 28px;
+        padding-top: 5px;
+        background-color: #af0014; 
+
+    }
+
+    .encabezado_inicio
+    {
+        background-color: #E2001A;
+    }
+    
+    .panel_menu
+    {
+     background-color: #E2001A;    
+     text-align: left;
+     color: white;          
+    }
+
+    .button_menu
+    {
+        background-color: #E2001A; 
+        padding-left: 25px;
+        padding-top: 1.5vh;
+        padding-bottom: 1.5vh;
+        font-size: 20px;
+        transition: .2s;
+    }
+
+    .button_menu:hover
+    {
+        background-color: #af0014;         
+        font-size: 22px;
+        cursor: pointer;
+    }
+
+    .button_paginacion
+    {
+        color: white;
+        border-style: solid;
+        border-width: 1px;
+        padding-left: 8px;
+        padding-right: 8px;
+        background-color: #E2001A;
+        transition: .15s; 
+        border-color: black;
+        font-size: 18px;        
+        display: inline-block; 
+
+    }
+
+    .button_paginacion:hover
+    {
+        transform: scale(1.05);
+        cursor: pointer;        
+        border-style: solid;
+        border-width: 1px;
+        padding-left: 8px;
+        padding-right: 8px;
+        background-color: #E2001A; 
+        color:white;
+        border-color: black;
+    }  
+
+    .button_paginacion.active
+    {        
+        border-style: solid;
+        border-width: 1px;
+        padding-left: 8px;
+        padding-right: 8px;
+        background-color: #E2001A; 
+        color:white;
+        border-color: black;
+    }        
+
+    .button_menu.active
+    {
+        background-color: #af0014;         
+    }
+
+    .btn_rectangle {
+        border-bottom-left-radius: 30px;
+        border-bottom-right-radius: 30px;
+        border-top-left-radius: 30px; 
+        border-top-right-radius: 30px; 
+        background-color: #E2001A;
+        color:white;
+        text-align: center;
+        padding-top: 3px; 
+        font-size: 20px; 
+        min-height: 35px;
+        transition: .2s; 
+        font-weight: 600;
+  }
+    .btn_rectangle:hover
+    {
+        cursor: pointer;
+        transform:scale(1.05,1.05);        
+        background-color: #af0014; 
+
+
+    }  
+
+    .btn_rectangle_secundario {
+      border-bottom-left-radius: 30px;
+        border-bottom-right-radius: 30px;
+        border-top-left-radius: 30px; 
+        border-top-right-radius: 30px; 
+        background-color: #828282;
+        color:white;
+        text-align: center;
+        padding-top: 3px; 
+        font-size: 20px; 
+        min-height: 35px;
+        transition: .2s; 
+        font-weight: 600;
+  }
+    .btn_rectangle_secundario:hover
+    {
+        cursor: pointer;
+        transform:scale(1.05,1.05);        
+        background-color: #7399b2; 
+
+
+    }      
+
+    input[type="text"]
+    , input[type="number"]
+    , input[type="password"]    
+    , textarea
+    , input[type="date"]
+    , option
+    , .bootstrap-select > .dropdown-toggle
+    , .bootstrap-select .dropdown-menu.inner 
+    , .bootstrap-select .dropdown-menu { 
+
+        background-color : #FDECEA;
+        color: black!important;
+        border-bottom-left-radius: 20px!important;
+        border-bottom-right-radius: 20px!important;
+        border-top-left-radius: 20px!important;
+        border-top-right-radius: 20px!important;
+        font-size: 20px!important;        
+    }
+
+    .dropdown-menu.inner :hover, .selected {
+    background-color:#E2001A!important;
+    color:white!important;
+    }
+
+    .error
+    {
+        color: #E2001A; 
+    }
+
+
+
+    
+
+
+    input[type="text"]:focus
+    , textarea:focus
+    , input[type="date"]:focus {    
+        border:1px solid gray;    
+        color: gray!important;
+        
+    }
+
+    input[type="date"]::-webkit-inner-spin-button, 
+    input[type="date"]::-webkit-clear-button
+    , select {
+        /* display: none; <- Crashes Chrome on hover */
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    
+
+    .input_white
+    {
+        background-color : white!important;          
+    }
+
+    .button_cerrar_sesion
+    {
+        color: white;
+        transition: .2s; 
+        font-size: 15px; 
+        font-weight: bold; 
+        font-style: italic;
+    }    
+
+    .button_cerrar_sesion:hover
+    {
+        cursor: pointer;
+        transform:scale(1.03,1.03);        
+    } 
+
+    .button_label
+    {
+        color: #E2001A;         
+        transition: .2s; 
+        font-size: 20px; 
+        font-weight: bold; 
+        font-style: italic;
+    }
+
+    .button_label:hover
+    {
+        cursor: pointer;
+        transform:scale(1.03,1.03);
+        
+    }
+
+    .button_icon
+    {
+        color: #E2001A;
+        transition: .2s; 
+        font-size: 25px; 
+    }
+
+    .button_icon:hover
+    {
+        cursor: pointer;
+        transform:scale(1.2,1.2);
+        color: #af0014; 
+    }  
+
+    .button_menu_grande
+    {
+      background-color: #E2001A; 
+      border-bottom-left-radius: 60px;
+      border-bottom-right-radius: 60px; 
+      border-top-left-radius: 60px; 
+      border-top-right-radius: 60px; 
+      font-size: 40px; 
+      text-align: center;
+      color: white;    
+      transition: .2s; 
+      margin-bottom: 20px; 
+      padding-top: 10px; 
+      padding-bottom: 10px; 
+    }
+
+    .button_menu_grande:hover
+    {
+        cursor: pointer;
+        transform:scale(1.02,1.02);                
+        background-color: #af0014;
+    }      
+
+    .button_imagen
+    {
+      transition: .2s; 
+    }    
+
+    .button_imagen:hover
+    {
+        cursor: pointer;
+        transform:scale(1.06,1.06);                        
+    }      
+
+    .button_menu_grande_secundario
+    {
+      background-color: #828282; 
+      border-bottom-left-radius: 60px;
+      border-bottom-right-radius: 60px; 
+      border-top-left-radius: 60px; 
+      border-top-right-radius: 60px; 
+      font-size: 40px; 
+      text-align: center;
+      color: white;    
+      transition: .2s; 
+      margin-bottom: 20px; 
+      padding-top: 10px; 
+      padding-bottom: 10px;                 
+    }
+    .button_menu_grande_secundario:hover
+    {
+        cursor: pointer;
+        transform:scale(1.02,1.02);                
+        background-color: #7399b2;
+    }   
+
+        
+    .div_tarjeta_arriba_encabezado
+    {
+        background-color: #E2001A;
+        color: white;
+        font-size: 25px;
+        font-weight: 700;
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        height: 50px;
+    }
+
+    .div_tarjeta_abajo_contenido
+    {
+        background-color: white; 
+        border-bottom-right-radius: 30px;
+        border-bottom-left-radius: 30px;
+        padding-right: 30px; 
+        padding-left: 30px; 
+        
+        
+    }
+
+    .contenido_de_pagina
+    {
+        background-color: #f0f0f0;
+        padding-top: 25px;
+        padding-right: 50px; 
+        padding-left: 50px; 
+        min-height: 95vh;
+    }
+
+    .label_campo
+    {
+        padding-top: 6px;
+    }
+
+    .titulo_de_tarjeta
+    {
+        font-weight: bold;
+        font-size: 30px;
+    }
+
+    .titulo_de_tarjeta_md
+    {
+        font-weight: bold;
+        font-size: 25px;
+    }
+
+    .div_row_tarjeta
+    {
+        padding-left: 15px;
+        padding-right: 15px;       
+        transition: .2s; 
+    }
+
+    .div_row_tarjeta_lista
+    {
+        padding-left: 15px;
+        padding-right: 15px;       
+        transition: .2s; 
+    }
+
+
+    .div_row_tarjeta_lista:hover
+    {
+        transform: scale(1.04);
+        cursor: pointer;
+    } 
+
+    .div_row_tarjeta_lista_sin_hover
+    {
+        padding-left: 15px;
+        padding-right: 15px;       
+        transition: .2s; 
+    }      
+
+    .div_tarjeta_arriba_contenido
+    {
+        background-color: white; 
+        border-top-left-radius: 30px;
+        border-top-right-radius: 30px;
+        
+    }
+ 
+
+    th
+    {   
+        color: white;        
+        font-weight: bold;         
+        text-align: center;                 
+        padding: 8px;
+        background-color: #E2001A; 
+    }
+
+    td {    
+      text-align: center;
+      padding: 8px;
+      border: 1px solid #dddddd;
+    }
+
+    tr:nth-child(even) {
+      background-color: #FDECEA;
+    }
+
+    tr:hover {    
+      background-color: #E2001A; 
+      color: white;
+      cursor: pointer;
+      
+    }
+
+    .tr_no_hover:hover
+    {
+        background-color: #E2001A!important; 
+        cursor: default;
+    }
+
+    .th_left
+    {
+        border-top-left-radius: 30px; 
+    }
+
+    .th_right
+    {
+        border-top-right-radius: 30px; 
+    }
+
+    .circulo_cuenta
+    {
+        background-color: #828282;
+        color:white;
+        width: 100px;
+        height: 100px;
+        display: inline-block;
+        padding-top: 0px;
+        border-radius: 60px;
+        font-size:40px;
+        padding-right: 0px;
+        padding-top: 19px;
+        font-weight: 700;
+    }
+
+    .label_circulo_cuenta
+    {
+        padding-top: 20px;
+        font-size: 20px;
+        text-align: center;        
+        font-weight: 700;
+    }
+
+    #loading
+    {
+        position: relative;
+        top: 0px;
+        left: 0px; 
+        width: 100%; 
+        height: 100%; 
+        background: white
+        /*url('http://localhost/48_horas/images/loading.gif')*/
+        url('http://micrositioroyalcanin.tk/images/loading.gif')
+        no-repeat center; 
+        position: fixed;
+        z-index: 100; 
+    }
+
+    /*Estilos para el checkbox*/
+
+    .container_checkbox {
+  display: block;
+  position: relative;
+  padding-left: 35px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  font-size: 22px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Hide the browser's default checkbox */
+.container_checkbox input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+/* Create a custom checkbox */
+.checkmark {
+  position: absolute;
+  top: 3px;
+  left: 0;
+  height: 25px;
+  width: 25px;
+  background-color: gray;
+}
+
+/* On mouse-over, add a grey background color */
+.container_checkbox:hover input ~ .checkmark {
+  background-color: #ccc;
+}
+
+/* When the checkbox is checked, add a blue background */
+.container_checkbox input:checked ~ .checkmark {
+  background-color: #E2001A;
+}
+
+/* Create the checkmark/indicator (hidden when not checked) */
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+/* Show the checkmark when checked */
+.container_checkbox input:checked ~ .checkmark:after {
+  display: block;
+}
+
+/* Style the checkmark/indicator */
+.container_checkbox .checkmark:after {
+  left: 10px;
+  top: 6px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 3px 3px 0;
+  -webkit-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
+}

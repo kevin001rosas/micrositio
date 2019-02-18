@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+   <head>
+      <!-- Required meta tags -->
+      <meta charset="utf-8">
+      
+      <!-- Bootstrap CSS -->
+      <!-- Latest compiled and minified CSS -->
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css">
+      <!-- jQuery library -->
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+      <!-- Popper JS -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"></script>
+      <!-- Latest compiled JavaScript -->
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+      <title>48 Horas</title>
+      <link href="https://fonts.googleapis.com/css?family=Work+Sans" rel="stylesheet">
+      <!--Cargamos los íconos-->
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+      <!-- Latest compiled and minified CSS -->
+      <link rel="stylesheet" href="../../css/bootstrap-select.css">
+      <!-- Latest compiled and minified JavaScript -->
+      <script src="../../js/bootstrap-select.js"></script>
+      <script src="../../js/cookie.js"></script>
+      <script src="../../js/utilidades.js"></script>      
+      <link rel="stylesheet" href="../../css/estilos.css">
+   </head>
+<div id="loading"></div>
+<script>
+      var url_foto = ""; 
+      $(document).ready(function() {
+       llenar_menu(); 
+       llenar_encabezado(); 
+       
+        llenar_datos();           
+        $("#button_ver_clientes" ).addClass("active");
+        quitar_loading(); 
+      });
+      function llenar_datos()
+      {
+        llenar_cliente();                 
+        llenar_mascotas(); 
+      }        
+
+      function llenar_tabla_sin_mascotas()
+      {
+          $("#tabla_mascotas").hide(); 
+
+          var contenido_append = `
+                               <div class="row">
+                                 <div class="col-12" style="text-align: center; font-size: 30px; ">
+                                  Sin mascotas
+                                 </div>
+                               </div>
+                               <div class="row form-group">
+                                  <div class="col-12 col-xl-9"></div>
+                                  <div class="col-12 col-xl-3 btn_rectangle_secundario" onclick="window.location.href='../mascotas/crear_mascota.html?id_cliente=${getValueFromUrl("id")}'">
+                                     Registrar Mascota
+                                  </div>
+                               </div>`; 
+
+      
+             $("#tabla_mascotas").html(contenido_append);
+             $("#tabla_mascotas").show("slow"); 
+      }
+
+      function llenar_mascotas()
+      { 
+        var settings = {
+           "async": false,
+           "crossDomain": true,
+           "url": `${api_url}/clientes/getUserPets/${getValueFromUrl("id")}`, 
+           "method": "GET",
+           "headers": {
+             "Content-Type": "application/json",
+             "cache-control": "no-cache",
+             "token": `${Cookies.get('token')}`, 
+             "id_usuario": `${Cookies.get('id_usuario')}`,
+"id_tipo_de_usuario": `${Cookies.get('id_tipo_de_usuario')}`,                                        
+           },
+           "processData": false,                      
+            success: function(data){       
+
+            if(data==="sin_mascotas")      
+            {                   
+              llenar_tabla_sin_mascotas(); 
+              return; 
+            }
+              
+            //Limpiamos el contenido de las clientes.
+            $("#tabla_mascotas").hide(""); 
+            $("#tabla_mascotas").html("");               
+            //Parseamos la información.             
+             var obj = JSON.parse(data);   
+             
+      
+             var contenido_append = ""; 
+
+             contenido_append += `
+                          <div class="row form-group">
+                                  <table style="width: 100%;margin-top: 15px;">
+                                     <tr class="tr_no_hover" style="border-bottom-left-radius: 40px;">
+                                        <th class="th_left" style="width: 30%;">Nombre</th>
+                                        <th style="width: 20%">Tipo</th>
+                                        <th style="width: 30%">Raza</th>
+                                        <th class="th_right" style="width: 20%">Fecha de Nacimiento</th>
+                                     </tr>`   
+      
+             //Cambiamos el valor actual del id para preparar el update  
+             for (var x =  0; x < obj.length; x++)
+             {
+               contenido_append += `
+                          <tr onclick="window.location.href='../mascotas/actualizar_mascota.html?id=${obj[x]["id"]}'">
+                            <td>${obj[x]["nombre"]}</td>
+                            <td>${obj[x]["tipo"]}</td>
+                            <td>${obj[x]["raza"]}</td>
+                            <td>${obj[x]["fecha_de_nacimiento"]}</td>
+                         </tr>`;
+             }
+
+            //Hacemos el append de los botones. 
+             contenido_append += `</table>
+                               </div>
+                               <div class="row form-group justify-content-center">
+                                  
+                                  <div class="col-12 col-xl-3 btn_rectangle" onclick="window.location.href='../mascotas/ver_mascotas.html?id_cliente=${getValueFromUrl("id")}'">
+                                     Ver Todo
+                                  </div>
+                                  <div class="col-12 col-xl-1"></div>                                  
+                                  <div class="col-12 col-xl-3 btn_rectangle_secundario" onclick="window.location.href='../mascotas/crear_mascota.html?id_cliente=${getValueFromUrl("id")}'">
+                                     Registrar Mascota
+                                  </div>
+                               </div>`; 
+
+      
+             $("#tabla_mascotas").html(contenido_append);
+             $("#tabla_mascotas").show("slow"); 
+             
+
+           }
+           , error: function(data)
+           {
+            contador_solicitudes++;
+            if(contador_solicitudes<cantidad_maxima_solicitudes)
+               llenar_mascotas();                
+           }
+         }
+      
+         $.ajax(settings);
+      }  
+
+      function llenar_cliente()
+      { 
+        var settings = {
+           "async": false,
+           "crossDomain": true,
+           "url": `${api_url}/clientes/${getValueFromUrl("id")}`, 
+           "method": "GET",
+           "headers": {
+             "Content-Type": "application/json",
+             "cache-control": "no-cache",
+             "token": `${Cookies.get('token')}`, 
+             "id_usuario": `${Cookies.get('id_usuario')}`,
+"id_tipo_de_usuario": `${Cookies.get('id_tipo_de_usuario')}`,                                        
+           },
+           "processData": false,                      
+            success: function(data){    
+              
+              
+            //Limpiamos el contenido de las clientes.
+            $("#tarjeta_cliente").hide("slow"); 
+            $("#tarjeta_cliente").html("");               
+            //Parseamos la información. 
+             var obj = JSON.parse(data);   
+             
+      
+             var contenido_append = ""; 
+             cantidad_elementos_en_pagina = obj.length; 
+
+             contenido_append += `<div class="row">`; 
+      
+              //Validamos que exista una imagen. Sino, ponemos la default.               
+              isUrlExists(obj[0]["foto_url"], function(status){
+                    if(status === 200){
+                       // file was found                                                                 
+                    }
+                    else if(status === 404){
+                       // 404 not found                                           
+                       obj[0]["foto_url"] = default_image_url;                       
+                    }
+                });
+
+              
+              
+
+              //$("#nombre").val(obj[0]["nombre_raza"]);
+               contenido_append += `
+                              <div class="col-12 col-xl-4" style="text-align:center;padding-top: 10px;padding-bottom: 10px;" >
+                                 <img src="${obj[0]["foto_url"]}" style="height:250px; ">
+                              </div>
+                              <div class="col-12 col-xl-8" style="margin:auto;">
+                                 <div class="row form-group">
+                                    <div class="col-12 form-group">
+                                       <div class="row">
+                                          <div class="col-12 espaciado_estrecho" style="font-size: 30px;font-weight: 700;">${obj[0]["cliente"]}</div>
+                                       </div>
+                                    </div>
+                                    <div class="col-12 espaciado_estrecho tamanio_letra_estandar"><b>Email:</b> ${obj[0]["email"]}</div>
+                                    <div class="col-12 espaciado_estrecho tamanio_letra_estandar"><b>Cel:</b> ${obj[0]["telefono_celular"]}</div>
+                                    <div class="col-12 espaciado_estrecho tamanio_letra_estandar"><b>Fecha de Nacimiento:</b> ${obj[0]["fecha_de_nacimiento_format"]}</div>
+                                 </div>
+                                 <div class="row">
+                                    <div class="col-12 espaciado_estrecho tamanio_letra_estandar"><b>Dirección:</b> ${obj[0]["direccion"]}</div>
+                                 </div>
+                              </div>
+                              <div style="position: absolute; text-align:right;right: 10px; bottom:10px;">
+                                 <span class="fa fa-pencil button_icon" onclick="window.location.href='./actualizar_cliente.html?id=${obj[0]["id"]}'" style="font-size: 40px;"></span>
+                              </div>`;
+             
+
+             contenido_append += `</div>`; 
+      
+             $("#tarjeta_cliente").html(contenido_append);
+             $("#tarjeta_cliente").show("slow"); 
+             
+
+           }
+           , error: function(data)
+           {
+            contador_solicitudes++;
+            if(contador_solicitudes<cantidad_maxima_solicitudes)
+               llenar_usuario();                
+           }
+         }
+      
+         $.ajax(settings);
+      }
+  
+</script>
+   <style>
+   </style>
+   <body>
+      <div class="container-fluid" >
+         <div class="row" id="encabezado">
+         </div>
+         <div class="row">
+            <div class="col-12 col-lg-2 panel_menu" id="menu"> 
+            </div>
+            <!-- Contenido de la página --> 
+            <div id="contenido_de_pagina" class="col-12 col-lg-10 contenido_de_pagina">
+               <div class="row">
+                  <div class="col-12 col-xl-12 form-group">
+                     <div class="row div_row_tarjeta">
+                        <div class="col-12 div_tarjeta_arriba_encabezado">
+                           Información General 
+                        </div>
+                        <div class="col-12 div_tarjeta_abajo_contenido" id="tarjeta_cliente">
+                           
+                        </div>
+                     </div>
+                  </div>
+                  <div class="col-12 col-xl-12 form-group">
+                     <div class="row div_row_tarjeta">
+                        <div class="col-12 div_tarjeta_abajo_contenido" style="border-top-left-radius: 30px; border-top-right-radius: 30px;padding-top: 15px;">
+                           <div class="row">
+                              <div class="col-12 letra_encabezado_naranja">
+                                 Mascotas
+                              </div>
+                           </div>
+                           <div class="row">
+                             <div class="col-12" id="tabla_mascotas">                                                              
+                             </div>
+                           </div>
+
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
+   </body>
+</html>
