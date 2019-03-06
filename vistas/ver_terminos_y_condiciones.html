@@ -18,7 +18,7 @@
       <!-- Latest compiled JavaScript -->
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
 
-      <title>48 Horas</title>
+      <title>Micrositio</title>
       <link href="https://fonts.googleapis.com/css?family=Work+Sans" rel="stylesheet">
 
       <!--Cargamos los íconos-->
@@ -33,22 +33,71 @@
 
       <script src="../../js/cookie.js"></script>
       <script src="../../js/utilidades.js"></script>      
+<script src="../../js/pdfobject.min.js"></script>
       <link rel="stylesheet" href="../../css/estilos.css">
-      
+      <style>
+        .pdfobject-container {
+    width: 100%;    
+    height: 70vh;     
+    margin: 0;
+}
+</style>
+      </style>
    </head>
 <div id="loading"></div>
    <script>
+      function llenar_terminos_y_condiciones()
+      {
+          var url_terminos_condiciones_01 = `${base_url}resources/terminos_royal_canin_01.pdf?id=0161478`;
+          PDFObject.embed(url_terminos_condiciones_01, "#my_pdf_01");
+
+          var url_terminos_condiciones_02 = `${base_url}resources/terminos_royal_canin_02.pdf?id=0161478`;
+          PDFObject.embed(url_terminos_condiciones_02, "#my_pdf_02");
+
+          var url_terminos_condiciones_03 = `${base_url}resources/terminos_royal_canin_03.pdf?id=0161478`;
+          PDFObject.embed(url_terminos_condiciones_03, "#my_pdf_03");
+
+          var url_terminos_condiciones_04 = `${base_url}resources/terminos_royal_canin_04.pdf?id=0161478`;
+          PDFObject.embed(url_terminos_condiciones_04, "#my_pdf_04");
+
+          quitar_loading(); 
+          
+
+          
+      }  
+
       $(document).ready(function() {
        llenar_menu(); 
        llenar_encabezado();         
-        $("#button_ver_tipos_de_mascotas" ).addClass("active");
+        $("#button_ver_terminos_y_condiciones").addClass("active");
+        llenar_terminos_y_condiciones(); 
         quitar_loading(); 
+        ocultar_botones(); 
       });
+
+      function ocultar_botones()
+      {
+        //Si ya ha leído los acuerdos, ocultamos los controladores. 
+        if(Cookies.get('acuerdos_leidos')=='1')
+        {
+          $("#div_aceptar_terminos_01").hide(); 
+          $("#div_aceptar_terminos_02").hide(); 
+          $("#div_aceptar_terminos_03").hide(); 
+          $("#div_aceptar_terminos_04").hide(); 
+        }
+      }
+
+
+    
 
       function validacion()
       {
         $("#errores").hide(); 
-        if($('#checkbox_terminos_condiciones').is(":checked")!==true)
+        if($('#checkbox_terminos_condiciones_01').is(":checked")!==true
+          || $('#checkbox_terminos_condiciones_02').is(":checked")!==true
+          || $('#checkbox_terminos_condiciones_03').is(":checked")!==true
+          || $('#checkbox_terminos_condiciones_04').is(":checked")!==true
+          )
         {
           $("#errores").html("Por favor, acepta los términos y condiciones para continuar."); 
           $("#errores").show("slow"); 
@@ -114,50 +163,79 @@
             </div>
             <!-- Contenido de la página --> 
             <div id="contenido_de_pagina" class="col-12 col-lg-10 contenido_de_pagina">
-              <div class="row">
+              <div class="row">    
                 <div class="col-12 letra_encabezado_naranja form-group" style="text-align: center;">
-                  POLÍTICA DE MARS PETCARE PARA LOS PATROCINIOS, ASOCIACIONES Y DONACIONES
-                </div>
-                <div class="col-12 letra_terminos_y_condiciones form-group">                  
-                  <p>En Mars Petcare- estamos muy involucrados en actividades dedicadas a los perros, gatos,
-caballos y otros animales de todo el mundo. Cada año patrocinamos cientos de eventos
-relacionados con animales, nos asociamos con muchas organizaciones y donamos cantidades
-sustanciales de alimento para mascotas, fondos y el tiempo de asociados. Todos estos
-esfuerzos son ejecutados con una sola visión en mente: "Un mundo mejor para las mascotas
-TM".
-La expectativa hacia nuestros socios en este tipo de eventos es que:<br><br>
-• Conozcan las normas de bienestar animal que son paralelas a las representadas en nuestras
-marcas. Esto incluye el respeto a las cinco libertades de bienestar de los animales reconocidas
-a nivel internacional. Las cinco libertades de bienestar de los animales son: libres del hambre
-y la sed por el fácil acceso a agua potable y a una dieta para mantener la salud y vigor; libre
-de malestar al proporcionar un entorno adecuado que incluya cobijo y una zona de descanso
-cómoda; libre de dolor, lesiones y enfermedades mediante la prevención o el rápido
-diagnóstico y tratamiento; libre de expresar un comportamiento normal, proporcionando
-espacio suficiente, instalaciones adecuadas y la compañía de la propia especie del animal; y
-libre de miedo y angustia, asegurando condiciones y el trato que eviten el sufrimiento mental.<br><br>
-• Adoptar una visión, misión y/o valores que reflejan nuestra propia (y más específicamente
-la de nuestras marcas asociadas). Cada socio debe adoptar políticas e involucrarse en
-prácticas que se alineen con nuestra visión guía de "Un mundo mejor para las mascotas TM".<br><br>
-• Adherirse a todas las leyes nacionales y los requisitos legales, especialmente en lo que se refiere a los animales y su bienestar.
-No vamos, en ningún caso, a considerar relaciones que involucren una demostración patrocinada, espectáculo o actividad:<br><br>
-• Que deliberadamente cause daño, dolor o angustia a cualquier animal.<br><br>
-• Que promueva una dieta o actividad que resultará en un daño intencional a cualquier animal.<br><br>
-• En el que el medio ambiente para todos los animales, no es conveniente o adecuado para apoyar su bienestar.<p>
-                </div>
+                  TÉRMINOS Y CONDICIONES
+                </div>            
+                <!--<div class="col-12 letra_terminos_y_condiciones form-group">                  
+                  <p></p>
+                </div>-->
                 <div class="col-12 form-group">
-                  <label class="container_checkbox">
-                    Acepto términos y condiciones
-                    <input id="checkbox_terminos_condiciones" type="checkbox">
-                    <span class="checkmark"></span>
-                  </label>
+                <div id="my_pdf_01"></div>                  
                 </div>
-                <div id="errores" class="col-12 form-group tamanio_letra_errores">                             
-                </div>                
-                <div class="col-12 form-group">
+                <div id="div_aceptar_terminos_01" class="col-12">
                   <div class="row">
-                    <div class="col-8"></div>
-                    <div class="col-4">
-                      <div class="btn_rectangle" onclick="aceptar_terminos_condiciones();">Continuar</div>
+                    <div class="col-12 form-group">
+                      <label class="container_checkbox">
+                        Acepto términos y condiciones
+                        <input id="checkbox_terminos_condiciones_01" type="checkbox">
+                        <span class="checkmark"></span>
+                      </label>
+                    </div>                    
+                  </div>
+                </div>
+
+                <div class="col-12 form-group">
+                <div id="my_pdf_02"></div>                  
+                </div>
+                <div id="div_aceptar_terminos_02" class="col-12">
+                  <div class="row">
+                    <div class="col-12 form-group">
+                      <label class="container_checkbox">
+                        Acepto términos y condiciones
+                        <input id="checkbox_terminos_condiciones_02" type="checkbox">
+                        <span class="checkmark"></span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-12 form-group">
+                <div id="my_pdf_03"></div>                  
+                </div>
+                <div id="div_aceptar_terminos_03" class="col-12">
+                  <div class="row">
+                    <div class="col-12 form-group">
+                      <label class="container_checkbox">
+                        Acepto términos y condiciones
+                        <input id="checkbox_terminos_condiciones_03" type="checkbox">
+                        <span class="checkmark"></span>
+                      </label>
+                    </div>                                        
+                  </div>
+                </div>
+
+                <div class="col-12 form-group">
+                <div id="my_pdf_04"></div>                  
+                </div>
+                <div id="div_aceptar_terminos_04" class="col-12">
+                  <div class="row">
+                    <div class="col-12 form-group">
+                      <label class="container_checkbox">
+                        Acepto términos y condiciones
+                        <input id="checkbox_terminos_condiciones_04" type="checkbox">
+                        <span class="checkmark"></span>
+                      </label>
+                    </div>
+                    <div id="errores" class="col-12 form-group tamanio_letra_errores">                             
+                    </div>                
+                    <div class="col-12 form-group">
+                      <div class="row">
+                        <div class="col-8"></div>
+                        <div class="col-4">
+                          <div class="btn_rectangle" onclick="aceptar_terminos_condiciones();">Continuar</div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

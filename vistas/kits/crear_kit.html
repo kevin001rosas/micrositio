@@ -18,7 +18,7 @@
       <!-- Latest compiled JavaScript -->
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
 
-      <title>48 Horas</title>
+      <title>Micrositio</title>
       <link href="https://fonts.googleapis.com/css?family=Work+Sans" rel="stylesheet">
 
       <!--Cargamos los íconos-->
@@ -33,6 +33,7 @@
 
       <script src="../../js/cookie.js"></script>
       <script src="../../js/utilidades.js"></script>      
+<script src="../../js/pdfobject.min.js"></script>
       <link rel="stylesheet" href="../../css/estilos.css">
       
    </head>
@@ -267,6 +268,12 @@
           return false; 
         }
 
+        if($("#cantidad").val()>10)
+        {
+          mostrar_errores("errores", "La cantidad Máxima de kits a solicitar es de 10.");   
+          return false; 
+        }        
+
         if($("#comentarios").val()=="") 
         {
           $("#errores").html("Debes especificar comentarios para continuar."); 
@@ -434,7 +441,7 @@
                                       </div>
                                       <div class="row form-group">
                                         <div class="col-4 label_campo" style="text-align: right;">Tipo de kit:</div>
-                                          <select id="id_tipo_de_kit" onchange="llenar_razas()" class="col-7 form-control selectpicker" placeholder="Tipo de kit">                                              
+                                          <select id="id_tipo_de_kit" class="col-7 form-control selectpicker" placeholder="Tipo de kit">                                              
                                           </select>                                                                         
                                       </div>
                                       <div class="row form-group">

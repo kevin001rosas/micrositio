@@ -33,7 +33,7 @@
 
       <script src="../../js/cookie.js"></script>
       <script src="../../js/utilidades.js"></script>      
-<script src="../../js/pdfobject.min.js"></script>
+      <script src="../../js/pdfobject.min.js"></script>
       <link rel="stylesheet" href="../../css/estilos.css">
       
    </head>
@@ -43,13 +43,10 @@
       $(document).ready(function() {        
        llenar_menu(); 
        llenar_encabezado(); 
-       llenar_kits(); 
+       llenar_tablas(); 
        //llenar_comboboxes(); 
         //llenar_datos();                   
-        $("#button_ver_kits").addClass("active");
-
-        //Ponemos el evento para el hover de la cámara. 
-        $("#foto_url").hover(poner_hover_foto, quitar_hover_foto);
+        $("#button_ver_solicitudes_de_acceso").addClass("active");
 
         configurar_eventos_de_busqueda(); 
         quitar_loading(); 
@@ -60,7 +57,7 @@
         $( "#nombre_busqueda" ).keydown(function(e) {
           if (e.keyCode == 13) {
             pagina_actual=1; 
-            llenar_kits(); 
+            llenar_tablas(); 
           }
         });
       }
@@ -79,23 +76,23 @@
              $("#kits").show("slow"); 
       }      
 
-      function llenar_kits()
+      function llenar_tablas()
       {        
         var settings = {
            "async": false,
            "crossDomain": true,
-           "url": `${api_url}/kits/getSearchByPage`, 
+           "url": `${api_url}/usuarios/getSearchByPage`, 
            "method": "GET",
            "headers": {
              "Content-Type": "application/json",
              "cache-control": "no-cache",
              "token": `${Cookies.get('token')}`, 
              "id_usuario": `${Cookies.get('id_usuario')}`,
-"id_tipo_de_usuario": `${Cookies.get('id_tipo_de_usuario')}`, 
+             "id_distribuidor": `${Cookies.get('id_distribuidor')}`,
              "id_tipo_de_usuario": `${Cookies.get('id_tipo_de_usuario')}`, 
              "pagina": `${pagina_actual}`, 
              "nombre": `${$("#nombre_busqueda").val()}`, 
-             "id_cliente": `${getValueFromUrl("id_cliente")}`
+             "modo" : "solicitados"
            },
            "processData": false,                      
             success: function(data){    
@@ -109,7 +106,7 @@
             $("#kits").hide(""); 
             $("#kits").html("");               
             //Parseamos la información. 
-             var obj = JSON.parse(data);   
+            var obj = JSON.parse(data);   
              
             cantidad_elementos_en_pagina = obj.length; 
             var contenido_append = ""; 
@@ -118,13 +115,12 @@
                           <div class="col-12 form-group">
                                   <table style="width: 100%;margin-top: 15px;font-size:20px;">
                                      <tr class="tr_no_hover" style="border-bottom-left-radius: 40px;">
-                                        <th class="th_left" style="width: 20%;">Solicitado Por</th>
-                                        <th style="width: 10%">Cantidad</th>
-                                        <th style="width: 10%">Raza</th>
-                                        <th style="width: 10%">Talla</th>
-                                        <th style="width: 15%">Fecha de solicitud</th>
-                                        <th style="width: 15%">Fecha de Nacimiento (Camada)</th>  
-                                        <th class="th_right" style="width: 20%">Estado</th>                                                                              
+                                        <th class="th_left" style="width: 30%;">Usuario</th>
+                                        <th style="width: 10%">Teléfono Local</th>
+                                        <th style="width: 10%">Teléfono Celular</th>
+                                        <th style="width: 10%">Email</th>
+                                        <th style="width: 20%">Tipo de Usuario</th>
+                                        <th class="th_right" style="width: 20%">Zona</th>                                                                                
                                      </tr>`   
       
              //Cambiamos el valor actual del id para preparar el update  
@@ -135,14 +131,13 @@
                 continue;
 
                contenido_append += `
-                          <tr onclick="window.location.href='../kits/ver_kit.html?id=${obj[x]["id"]}'">
-                            <td>${obj[x]["solicitado_por"]}</td>
-                            <td>${obj[x]["cantidad"]}</td>
-                            <td>${obj[x]["raza"]}</td>
-                            <td>${obj[x]["talla"]}</td>
-                            <td>${obj[x]["fecha_de_solicitud"]}</td>
-                            <td>${obj[x]["fecha_de_nacimiento_camada"]}
-                            <td>${obj[x]["estado_de_kit"]}</td>                            
+                          <tr onclick="window.location.href='../usuarios/actualizar_usuario.html?id=${obj[x]["id"]}'">
+                            <td>${obj[x]["usuario"]}</td>
+                            <td>${obj[x]["telefono_local"]}</td>
+                            <td>${obj[x]["telefono_celular"]}</td>
+                            <td>${obj[x]["email"]}</td>
+                            <td>${obj[x]["tipo_de_usuario"]}</td>
+                            <td>${obj[x]["ciudad"]}</td>                            
                          </tr>`;
              }
 
@@ -171,7 +166,7 @@
       { 
         pagina_actual = parseInt(boton.dataset.pagina);        
         //Hacemos solicitud a kits/get_by_page/1 En caso de no existir un filtro guardado.
-        llenar_kits(); 
+        llenar_tablas(); 
 
         //Hacemos solicitud a kits/search/1 En caso de existir un filtro guardado. 
       }
@@ -456,14 +451,11 @@
                   <div class="row" style="padding-left: 20px;padding-right: 20px;">
                     <div class="col-12">
                         <div class="row form-group justify-content-center">
-                            <div class="col-12 col-xl-8 form-group">
-                              <input type="text" id="nombre_busqueda" class="input_white form-control" placeholder="Buscar por nombre de solicitante..."/>
-                            </div>
-                            <div class="col-xl-3 col-12 form-group">
-                              <div class="btn_rectangle_secundario" onclick="window.location.href='./crear_kit.html'">Solicitar Kit</div>
-                            </div>
-                            <div class="col-12 col-xl-1 form-group" style="text-align: left; ">
-                              <img class="button_icon" onclick="descargar_kits()" src='../../images/excel.png' style='height: 40px; width:auto;'>
+                            <div class="col-12 col-xl-11 form-group">
+                              <input type="text" id="nombre_busqueda" class="input_white form-control" placeholder="Buscar por nombre o email..."/>
+                            </div>                            
+                            <div id="div_descargar" class="col-12 col-xl-1 form-group" style="text-align: left; ">
+                              <img class="button_icon" onclick="descargar_solicitudes_de_acceso()" src='../../images/excel.png' style='height: 40px; width:auto;'>
                             </div>
                         </div>                    
                     </div>

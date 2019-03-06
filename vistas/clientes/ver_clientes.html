@@ -18,7 +18,7 @@
       <!-- Latest compiled JavaScript -->
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
 
-      <title>48 Horas</title>
+      <title>Micrositio</title>
       <link href="https://fonts.googleapis.com/css?family=Work+Sans" rel="stylesheet">
 
       <!--Cargamos los íconos-->
@@ -33,6 +33,7 @@
 
       <script src="../../js/cookie.js"></script>
       <script src="../../js/utilidades.js"></script>      
+<script src="../../js/pdfobject.min.js"></script>
       <link rel="stylesheet" href="../../css/estilos.css">
       
    </head>
@@ -72,8 +73,7 @@
              "cache-control": "no-cache",
              "token": `${Cookies.get('token')}`, 
              "id_usuario": `${Cookies.get('id_usuario')}`,
-"id_tipo_de_usuario": `${Cookies.get('id_tipo_de_usuario')}`, 
-             "id_search_user": `${getValueFromUrl("id_search_user")}`, 
+             "id_tipo_de_usuario": `${Cookies.get('id_tipo_de_usuario')}`,              
              "pagina": `${pagina_actual}`, 
              "nombre": `${$("#nombre_busqueda").val()}`
            },
@@ -110,7 +110,7 @@
               
 
               //$("#nombre").val(obj[0]["nombre_raza"]);
-               contenido_append += 
+               /*contenido_append += 
                `<div class='col-12 col-xl-6 form-group'>
                                 <div class='row div_row_tarjeta_lista' onclick="window.location.href='./perfil_de_cliente.html?id=${obj[x]["id"]}'">
                                     <div class='col-12 div_tarjeta_arriba_contenido'>
@@ -135,28 +135,67 @@
                                                 <div class='row form-group'>
                                                     <div class='col-12 espaciado_estrecho' style="font-size: 23px;font-weight: 700;">${obj[x]["cliente"]}</div>
                                                     <div class='col-12 espaciado_estrecho form-group tamanio_letra_estandar'>
-                                                      ${obj[x]["ciudad"]}
-                                                    </div>
-                                                    <div class='col-12 espaciado_estrecho form-group tamanio_letra_estandar'>
-                                                      ${obj[x]["delegacion"]}
-                                                    </div>
-                                                    <div class='col-12 espaciado_estrecho form-group tamanio_letra_estandar'>
                                                       ${obj[x]["email"]}
-                                                    </div>                                                    
-                                                </div>
-                                                <div class="row">
-                                                    <div class='col-12 espaciado_estrecho tamanio_letra_estandar'>
-                                                      <b>Teléfono Celular:</b>
+                                                    </div>
+                                                    <div class='col-12 form-group tamanio_letra_estandar'>${obj[x]["ciudad"]}
+                                                    </div>
+                                                    <div class='col-12 espaciado_estrecho form-group tamanio_letra_estandar'><b>Criador:</b>
                                                     </div>
                                                     <div class='col-12 espaciado_estrecho form-group tamanio_letra_estandar'>
-                                                      +55 1394 2392
+                                                      ${obj[x]["criador"]} 
                                                     </div>
-                                                </div>
+                                                    <div class='col-12 espaciado_estrecho form-group tamanio_letra_estandar'>
+                                                      ${obj[x]["email_criador"]}
+                                                    </div>
+                                                </div>                                                
                                             </div>           
                                             <div style='position: absolute; display:none;text-align:right;right: 10px; top:10px;'>
                                                 <span style='color: green;font-weight: bold;'>Aqui va es esatdo de mascota</span>
                                                 <img src='http://localhost/48_horas/images/camera.png' style='height: 30px; width:auto;margin-top: -2px; '>
                                             </div>                                            
+                                        </div>
+                                    </div>
+                                    <div class='col-12 div_tarjeta_abajo_button' onclick="window.location.href='./perfil_de_cliente.html?id=${obj[x]["id"]}'">
+                                        Ver
+                                    </div>
+                                </div>                                
+                              </div>`;*/
+
+                              //Validamos que exista una imagen. Sino, ponemos la default.               
+                              var image = new Image(); 
+                              image.src = obj[x]["foto_url"];
+                              if (image.width == 0) {
+                                obj[x]["foto_url"] = default_image_url;                            
+                              }
+
+                              contenido_append += `<div class='col-12 col-xl-6 form-group'>
+                                <div class='row div_row_tarjeta_lista' onclick="window.location.href='./perfil_de_cliente.html?id=${obj[x]["id"]}'">
+                                    <div class='col-12 div_tarjeta_arriba_contenido'>
+                                        <div class='row'>
+                                            <div class='col-12 col-md-3' style='text-align:center;padding-top: 20px;padding-bottom: 0px;' >
+                                                <img src='${obj[x]["foto_url"]}' style='height:100px; '>
+                                            </div>  
+                                            <div class='col-12 col-md-9' style='padding-top: 20px; padding-left: 30px;'>
+                                                <div class='row'>
+                                                    <div class='col-12 espaciado_estrecho' style="font-size: 23px;font-weight: 700;">${obj[x]["cliente"]}</div>
+                                                    <div class='col-12 espaciado_estrecho tamanio_letra_estandar'>
+                                                      ${obj[x]["email"]}
+                                                    </div>
+                                                    <div class='col-12 tamanio_letra_estandar'>${obj[x]["ciudad"]}
+                                                    </div>                                                    
+                                                </div>                                                
+                                            </div>                                                       
+                                        </div>
+                                        <div style="text-align:center;" class='row form-group'>
+                                          <div class='col-12 espaciado_estrecho form-group tamanio_letra_estandar'><b>Criador</b>
+                                                    </div>
+                                                    <div class='col-12 espaciado_estrecho form-group tamanio_letra_estandar'>
+                                                      ${obj[x]["criador"]} 
+                                                    </div>
+                                                    <div class='col-12 espaciado_estrecho form-group tamanio_letra_estandar'>
+                                                      ${obj[x]["email_criador"]}
+                                            </div>
+
                                         </div>
                                     </div>
                                     <div class='col-12 div_tarjeta_abajo_button' onclick="window.location.href='./perfil_de_cliente.html?id=${obj[x]["id"]}'">
@@ -212,7 +251,7 @@
                     <div class="col-12">
                         <div class="row form-group justify-content-center">                            
                             <div class="col-12 col-xl-8 form-group">
-                              <input type="text" id="nombre_busqueda" class="input_white form-control" placeholder="Buscar por nombre o apellido..."/>
+                              <input type="text" id="nombre_busqueda" class="input_white form-control" placeholder="Buscar por nombre, correo, zona de dueño o nombre y correo de criador..."/>
                             </div>
                             <div class="col-xl-3 col-12 form-group">
                               <div class="btn_rectangle_secundario" onclick="window.location.href='./crear_cliente.html'">Emisión de Certificado</div>

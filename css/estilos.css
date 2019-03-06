@@ -91,14 +91,14 @@
         padding-left: 25px;
         padding-top: 1.5vh;
         padding-bottom: 1.5vh;
-        font-size: 20px;
+        font-size: 17px;
         transition: .2s;
     }
 
     .button_menu:hover
     {
-        background-color: #af0014;         
-        font-size: 22px;
+        background-color: #AF0014;         
+        transform: scale(1.05); 
         cursor: pointer;
     }
 
@@ -197,12 +197,12 @@
     , input[type="password"]    
     , textarea
     , input[type="date"]
-    , option
+    , option    
     , .bootstrap-select > .dropdown-toggle
     , .bootstrap-select .dropdown-menu.inner 
     , .bootstrap-select .dropdown-menu { 
 
-        background-color : #FDECEA;
+        background-color : #FDECEA!important;
         color: black!important;
         border-bottom-left-radius: 20px!important;
         border-bottom-right-radius: 20px!important;
@@ -267,14 +267,15 @@
     {
         color: #E2001A;         
         transition: .2s; 
-        font-size: 20px; 
-        font-weight: bold; 
+        font-size: 15px; 
+        font-weight: normal; 
         font-style: italic;
     }
 
     .button_label:hover
     {
         cursor: pointer;
+        font-weight: bold;
         transform:scale(1.03,1.03);
         
     }
@@ -363,6 +364,25 @@
         height: 50px;
     }
 
+    .div_tarjeta_arriba_encabezado_white
+    {
+        background-color: white;
+        color: #E2001A;
+        font-size: 25px;
+        font-weight: 700;
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+        padding-top: 10px;
+        padding-bottom: 45px;
+        height: 50px;
+        border-color: #E2001A;
+        border-bottom-width: 3px;
+        border-top-width: 0px;
+        border-left-width: 0px;
+        border-right-width: 0px;
+        border-style: solid;
+    }    
+
     .div_tarjeta_abajo_contenido
     {
         background-color: white; 
@@ -377,6 +397,15 @@
     .contenido_de_pagina
     {
         background-color: #f0f0f0;
+        padding-top: 25px;
+        padding-right: 50px; 
+        padding-left: 50px; 
+        min-height: 95vh;
+    }
+
+    .contenido_de_pagina_red    
+    {
+        background-color: #E2001A;
         padding-top: 25px;
         padding-right: 50px; 
         padding-left: 50px; 

@@ -18,7 +18,7 @@
       <!-- Latest compiled JavaScript -->
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
 
-      <title>48 Horas</title>
+      <title>Micrositio</title>
       <link href="https://fonts.googleapis.com/css?family=Work+Sans" rel="stylesheet">
 
       <!--Cargamos los íconos-->
@@ -33,6 +33,7 @@
 
       <script src="../../js/cookie.js"></script>
       <script src="../../js/utilidades.js"></script>      
+<script src="../../js/pdfobject.min.js"></script>
       <link rel="stylesheet" href="../../css/estilos.css">
       
    </head>
@@ -53,7 +54,22 @@
         //Ponemos el evento para el hover de la cámara. 
         $("#foto_url").hover(poner_hover_foto, quitar_hover_foto);
         quitar_loading(); 
+        ocultar_controles(); 
       });
+
+      function ocultar_controles()
+      { 
+        if(Cookies.get("id_tipo_de_usuario")=="1")
+        {          
+          $("#div_estado_de_kit_label").hide(); 
+        }
+        else
+        {
+          $("#div_estado_de_kit").hide(); 
+          $("#div_guardar_cambios").hide(); 
+        }
+        
+      }
 
       function preparar_envio()
       {
@@ -85,6 +101,61 @@
 
       function llenar_comboboxes()
       {
+        llenar_tipos_de_mascota(); 
+        llenar_estados_de_kit(); 
+
+      }
+
+      function llenar_estados_de_kit()
+      {
+        contador_solicitudes++; 
+        var settings = {
+           "async": false,
+           "crossDomain": true,
+           "url": `${api_url}/estadosdekit`, 
+           "method": "GET",
+           "headers": {
+             "Content-Type": "application/json",
+             "cache-control": "no-cache",
+             "token": `${Cookies.get('token')}`, 
+             "id_usuario": `${Cookies.get('id_usuario')}`, 
+             "id_tipo_de_usuario": `${Cookies.get('id_tipo_de_usuario')}`
+           },
+           "processData": false,              
+            success: function(data){    
+            //////console.log(data); 
+            //Parseamos la información. 
+             var obj = JSON.parse(data);        
+      
+             //Limpiamos el contenido actual 
+             $("#id_estado_de_kit").html("");
+             var nuevo_contenido = ""; 
+      
+             //Llenamos las nuevas opciones. 
+             for (var x =  0; x < obj.length; x++) 
+             {
+               var id = obj[x]["id"]; 
+               var nombre = obj[x]["nombre"];                
+               nuevo_contenido += `<option value="${id}">${nombre}</option>`; 
+             }
+      
+             $("#id_estado_de_kit").html(nuevo_contenido);   
+             //Seleccinamos la primera opción
+             $('#id_estado_de_kit').selectpicker('val', $("#id_estado_de_kit option:first").val());
+             $("#id_estado_de_kit").selectpicker('refresh'); 
+           }
+            , error: function(data) {
+               //Volvemos a invocar la función. 
+               if(contador_solicitudes<7)
+                llenar_estados_de_kit();                
+            }
+         }
+      
+         $.ajax(settings);         
+      }      
+
+      function llenar_tipos_de_mascota()
+      {
         contador_solicitudes++; 
         var settings = {
            "async": false,
@@ -99,7 +170,7 @@
            },
            "processData": false,                      
             success: function(data){    
-            console.log(data); 
+            //console.log(data); 
             //Parseamos la información. 
              var obj = JSON.parse(data);                
 
@@ -125,12 +196,11 @@
             , error: function() {
                //Volvemos a invocar la función. 
                if(contador_solicitudes<cantidad_maxima_solicitudes)
-               llenar_comboboxes();
+               llenar_tipos_de_mascota();
             }           
          }
       
          $.ajax(settings); 
-
       }
 
       function llenar_razas()
@@ -152,7 +222,7 @@
            },
            "processData": false,                      
             success: function(data){    
-            console.log(data); 
+            //console.log(data); 
             //Parseamos la información. 
              var obj = JSON.parse(data);                    
                    
@@ -184,16 +254,18 @@
       {
          //Modificamos la raza con Ajax. 
          var form = {};
-                  
 
-         form.nombre = $("#nombre").val();
-         form.fecha_de_nacimiento_camada = $("#fecha_de_nacimiento_camada").val();
-         form.genero = $("#genero").val();
-         form.id_raza = $("#id_raza").val(); 
-         form.id_cliente = kit.id_cliente; 
-         form.foto_url = kit.foto_url;
+        
+         form.id_solicitado_por = kit.id_solicitado_por; 
+         form.cantidad = kit.cantidad; 
+         form.fecha_de_nacimiento_camada = kit.fecha_de_nacimiento_camada;          
+         form.id_raza = kit.id_raza; 
+         form.comentarios = kit.comentarios; 
+         form.id_estado_de_kit = $("#id_estado_de_kit").val(); 
+         form.id_tipo_de_kit = kit.id_tipo_de_kit; 
 
          console.log(form); 
+
 
 
          var settings = {
@@ -205,15 +277,16 @@
              "Content-Type": "application/json",
              "cache-control": "no-cache",
              "token": `${Cookies.get('token')}`, 
+             "id_tipo_de_usuario": `${Cookies.get('id_tipo_de_usuario')}`, 
              "id_usuario": `${Cookies.get('id_usuario')}`
            },
            "processData": false,
            "data": JSON.stringify(form)
          }
       
-         $.ajax(settings).done(function (response) {
+         $.ajax(settings).done(function (response) {          
            //Regresamos a la ventana para ver los tipos de kit. 
-           alert("Datos actualizados");            
+           window.location.href = `${base_url}/vistas/kits/ver_kits.html`; 
          });         
       }
 
@@ -315,7 +388,7 @@
            },
            "processData": false,                                 
             success: function(data){    
-            console.log(data); 
+            //console.log(data); 
             //Parseamos la información. 
              var obj = JSON.parse(data);                    
 
@@ -326,6 +399,9 @@
               kit.id_raza = obj[0]["id_raza"]; 
               kit.comentarios = obj[0]["comentarios"]; 
               kit.id_solicitado_por = obj[0]["id_solicitado_por"]; 
+              kit.id_estado_de_kit = obj[0]["id_estado_de_kit"]; 
+              kit.id_tipo_de_kit = obj[0]["id_tipo_de_kit"]; 
+
              
 
       
@@ -333,6 +409,9 @@
               $("#cantidad").html(obj[0]["cantidad"]);
               $("#fecha_de_nacimiento_camada").html(obj[0]["fecha_de_nacimiento_camada"]);
               $("#comentarios").html(obj[0]["comentarios"]);
+              $("#estado_de_kit").html(obj[0]["estado_de_kit"]);
+              $("#tipo_de_kit").html(obj[0]["tipo_de_kit"]);
+              
 
               //Llenamos los datos de cliente. 
 
@@ -340,6 +419,15 @@
               $("#solicitado_por").html(contenido_solicitado_por);
               
               $("#email").html(obj[0]["email"]);              
+
+              $("#email").html(obj[0]["email"]);              
+
+              $("#raza").html(obj[0]["raza"]);              
+              $("#tipo_de_mascota").html(obj[0]["tipo_de_mascota"]);              
+              
+
+              $('#id_estado_de_kit').selectpicker('val', obj[0]["id_estado_de_kit"]);
+              $("#id_estado_de_kit").selectpicker('refresh'); 
 
               //Seleccionamos el tipo de especie (Se actualizarán las razas)              
               $('#id_tipo_de_mascota').selectpicker('val', obj[0]["id_tipo_de_mascota"]);
@@ -400,17 +488,29 @@
                                       <div class="row form-group">
                                         <div class="col-4 label_campo" style="text-align: right;">Fecha de Nacimiento de Camada:</div>
                                           <div id="fecha_de_nacimiento_camada" class="col-7 label_campo" placeholder="fecha_de_nacimiento_camada"></div>
-                                      </div>                                      
+                                      </div>                      
+                                      <div class="row form-group" style="display: none;">
+                                        <div class="col-4 label_campo" style="text-align: right;">Tipo de Kit:</div>
+                                        <select id="id_tipo_de_mascota" onchange="llenar_razas()" class="col-7 selectpicker" placeholder="Tipo de kit">             
+                                          </select>
+                                      </div>                
+                                      <div class="row form-group">
+                                        <div class="col-4 label_campo" style="text-align: right;">Tipo de Kit:</div>
+                                        <div id="tipo_de_kit" class="col-7 label_campo"></div>
+                                          </select>
+                                      </div>                
                                       <div class="row form-group">
                                         <div class="col-4 label_campo" style="text-align: right;">Tipo de Mascota:</div>
-                                          <select id="id_tipo_de_mascota" onchange="llenar_razas()" class="col-7 selectpicker" placeholder="Tipo de kit">             
-                                          </select>                                                                         
+                                          <div id="tipo_de_mascota" class="col-7 label_campo"></div>
                                       </div>
                                       <div class="row form-group">
                                         <div class="col-4 label_campo" style="text-align: right;">Raza:</div>
-                                          <select id="id_raza" class="col-7 selectpicker" placeholder="Raza">
-                                          </select>
+                                          <div id="raza" class="col-7 label_campo"></div>
                                       </div>    
+                                      <div class="row form-group" style="display: none;">
+                                        <select id="id_raza" class="col-7 selectpicker" placeholder="Raza">
+                                            </select>
+                                      </div>
                                       <div class="row form-group">
                                         <div class="col-4 label_campo" style="text-align: right;">Comentarios:</div>
                                           <div id="comentarios" class="col-7 label_campo" rows="4"></div>
@@ -419,10 +519,24 @@
                                         <div class="col-4 label_campo" style="text-align: right;">estado: (No se muestra)</div>
                                           <div id="estado" class="col-7" placeholder="estado"></div>
                                       </div>                                      
+                                    <div id="div_estado_de_kit" class="row form-group">
+                                       <div class="col-4 label_campo" style="text-align: right;">Estado de Kit(s):</div>
+                                       <select id="id_estado_de_kit" class="col-7 form-control selectpicker" placeholder="Tipo de Usuario"></select>
+                                    </div>
+                                    <div id="div_estado_de_kit_label" class="row form-group">
+                                       <div class="col-4 label_campo" style="text-align: right;">Estado de Kit(s):</div>
+                                       <div id="estado_de_kit" class="col-7 label_campo"></div>
+                                    </div>
                                       <div class="row justify-content-center form-group">
-                                        <div class="col-6"></div>
-                                        <div class="col-4 btn_rectangle" onclick="window.history.back();">
-                                          Regresar                                     
+                                        <div class="col-5">
+                                          <div class="btn_rectangle_secundario" onclick="window.history.back();">
+                                            Regresar                                     
+                                          </div>                               
+                                        </div>
+                                        <div id="div_guardar_cambios" class="col-5">
+                                          <div class="btn_rectangle" onclick="actualizar();">
+                                            Guardar Cambios                                     
+                                          </div>                               
                                         </div>
                                       </div>
                                     </div>                                  

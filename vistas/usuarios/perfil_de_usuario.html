@@ -13,7 +13,7 @@
       <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"></script>
       <!-- Latest compiled JavaScript -->
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
-      <title>48 Horas</title>
+      <title>Micrositio</title>
       <link href="https://fonts.googleapis.com/css?family=Work+Sans" rel="stylesheet">
       <!--Cargamos los íconos-->
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -23,6 +23,7 @@
       <script src="../../js/bootstrap-select.js"></script>
       <script src="../../js/cookie.js"></script>
       <script src="../../js/utilidades.js"></script>      
+<script src="../../js/pdfobject.min.js"></script>
       <link rel="stylesheet" href="../../css/estilos.css">
    </head>
 <div id="loading"></div>
@@ -45,10 +46,10 @@
 
       function llenar_datos()
       {
-        llenar_usuario();         
-        
+        llenar_usuario();                 
         //Solo en caso de que sea un usuario de criador, mostraremos la información adicional. 
-        if(usuario.id_tipo_de_usuario.toString()==="1")
+        if((usuario.id_tipo_de_usuario.toString()==="1")
+          ||(usuario.id_tipo_de_usuario.toString()==="5"))
         {
           $("#div_informacion_general").removeClass("col-xl-8");
 
@@ -61,6 +62,23 @@
           llenar_clientes(); 
           llenar_cuenta_de_clientes(); 
           //llenar_inventario_de_mascotas(); 
+        }
+
+        
+        //En caso de no ser un usuario de 48 horas, ocultaremos los badges. 
+        if(usuario.c48_horas.toString()==="0")
+        {
+          $("#div_informacion_general").removeClass("col-xl-8");
+          $("#div_nivel_de_usuario").hide();
+        }
+
+        //En caso de que el usuario loggeado sea un distribuidor, ocultaremos la información adicional. 
+        if((Cookies.get("id_tipo_de_usuario")==="5"))
+        {
+          $("#div_informacion_general").removeClass("col-xl-8");
+
+          $("#div_nivel_de_usuario").hide();
+          $("#div_certificados").hide();
         }
         
       }
@@ -264,8 +282,8 @@
                             <tr class="tr_no_hover" style="border-bottom-left-radius: 40px;">
                               <th class="th_left" style="width: 30%;">Cliente</th>
                               <th style="width: 30%">Correo</th>
-                              <th style="width: 20%">Celular</th>
-                              <th class="th_right" style="width: 20%">Fecha de Nacimiento</th>
+                              <th style="width: 25%">Celular</th>                              
+                              <th class="th_right" style="width: 15%">Fecha de Emisión de Certificado</th>
                             </tr>`   
       
              //Cambiamos el valor actual del id para preparar el update  
@@ -273,10 +291,10 @@
              {
                contenido_append += `
                             <tr onclick="window.location.href='../clientes/perfil_de_cliente.html?id=${obj[x]["id"]}'">
-                              <td>${obj[0]["cliente"]}</td>
-                              <td>${obj[0]["email"]}</td>
-                              <td>${obj[0]["telefono_celular"]}</td>
-                              <td>${obj[0]["fecha_de_nacimiento"]}</td>
+                              <td>${obj[x]["cliente"]}</td>
+                              <td>${obj[x]["email"]}</td>
+                              <td>${obj[x]["telefono_celular"]}</td>                              
+                              <td>${obj[x]["fecha_de_registro"]}</td>
                             </tr>
                           `;
              }
@@ -377,11 +395,14 @@
              "cache-control": "no-cache",
              "token": `${Cookies.get('token')}`, 
              "id_usuario": `${Cookies.get('id_usuario')}`,
+             "id_distribuidor": `${Cookies.get('id_distribuidor')}`,
              "id_tipo_de_usuario": `${Cookies.get('id_tipo_de_usuario')}`                                      
            },
            "processData": false,                      
             success: function(data){    
               console.log(data); 
+              if(data=="incorrecto")
+                mandar_a_perfil(); 
               
             //Limpiamos el contenido de las clientes.
             $("#tarjeta_usuario").hide("slow"); 
@@ -395,6 +416,7 @@
 
 
              usuario.id_tipo_de_usuario = obj[0]["id_tipo_de_usuario"]; 
+             usuario.c48_horas = obj[0]["c48_horas"]; 
 
       
              //Cambiamos el valor actual del id para preparar el update  

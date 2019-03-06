@@ -18,7 +18,7 @@
       <!-- Latest compiled JavaScript -->
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
 
-      <title>48 Horas</title>
+      <title>Micrositio</title>
       <link href="https://fonts.googleapis.com/css?family=Work+Sans" rel="stylesheet">
 
       <!--Cargamos los íconos-->
@@ -33,6 +33,7 @@
 
       <script src="../../js/cookie.js"></script>
       <script src="../../js/utilidades.js"></script>      
+<script src="../../js/pdfobject.min.js"></script>
       <link rel="stylesheet" href="../../css/estilos.css">
       
    </head>
@@ -61,6 +62,56 @@
         $("#foto_url").attr('src', default_image_url);        
       }
 
+function llenar_marcas()
+      {
+        contador_solicitudes++;
+        var settings = {
+           "async": false,
+           "crossDomain": true,
+           "url": `${api_url}/marcas`, 
+           "method": "GET",
+           "headers": {
+             "Content-Type": "application/json",
+             "cache-control": "no-cache",
+             "token": `${Cookies.get('token')}`, 
+             "id_usuario": `${Cookies.get('id_usuario')}`, 
+             "id_tipo_de_usuario": `${Cookies.get('id_tipo_de_usuario')}`
+           },
+           "processData": false,                      
+            success: function(data){
+            //console.log(data);
+            //Parseamos la información. 
+             var obj = JSON.parse(data);
+      
+             //Limpiamos el contenido actual 
+             $("#id_marca").html("");
+             var nuevo_contenido = ""; 
+      
+             //Llenamos las nuevas opciones. 
+             for (var x =  0; x < obj.length; x++) 
+             {
+               var id = obj[x]["id"]; 
+               var nombre = obj[x]["nombre"];                
+               nuevo_contenido += `<option value="${id}">${nombre}</option>`; 
+             }
+      
+             $("#id_marca").html(nuevo_contenido);   
+             //Seleccinamos la primera opción 
+             $('#id_marca').selectpicker('val', $("#id_marca option:first").val());
+             $("#id_marca").selectpicker('refresh'); 
+                
+
+           }
+           , error: function() {
+               //Volvemos a invocar la función. 
+               if(contador_solicitudes<cantidad_maxima_solicitudes)
+               llenar_marcas();                
+            }
+         }
+      
+         $.ajax(settings);         
+      }      
+
       function quitar_hover_foto()
       {
         //Quitamos la imagen del preview. 
@@ -72,6 +123,15 @@
 
       function llenar_comboboxes()
       {
+        llenar_tipos_de_mascota(); 
+        llenar_marcas(); 
+        
+
+      }
+
+      function llenar_tipos_de_mascota()
+      {
+        contador_solicitudes++; 
         var settings = {
            "async": false,
            "crossDomain": true,
@@ -85,7 +145,7 @@
            },
            "processData": false,                      
             success: function(data){    
-            console.log(data); 
+            //console.log(data); 
             //Parseamos la información. 
              var obj = JSON.parse(data);                
 
@@ -108,10 +168,14 @@
              $('#id_tipo_de_mascota').selectpicker('val', $("#id_tipo_de_mascota option:first").val());
              $("#id_tipo_de_mascota").selectpicker('refresh'); 
            }
+            , error: function() {
+               //Volvemos a invocar la función. 
+               if(contador_solicitudes<cantidad_maxima_solicitudes)
+               llenar_tipos_de_mascota();
+            }           
          }
       
          $.ajax(settings); 
-
       }
 
       function llenar_razas()
@@ -146,7 +210,8 @@
                 continue; 
                var id_raza = obj[x]["id_raza"]; 
                var raza = obj[x]["raza"]; 
-               nuevo_contenido += `<option value="${id_raza}">${raza}</option>`; 
+               var talla = obj[x]["talla"] ===""? "": `(${obj[x]["talla"]})`; 
+               nuevo_contenido += `<option value="${id_raza}">${raza} ${talla}</option>`;
                
              }            
 
@@ -193,7 +258,8 @@ function validacion()
          form.genero = $("#genero").val();
          form.id_raza = $("#id_raza").val(); 
          form.id_cliente = getValueFromUrl("id_cliente"); 
-         form.foto_url = '';
+         form.id_marca = $("#id_marca").val();
+         form.esterilizado = $("#esterilizado").val();         
 
          var settings = {
            "async": false,
@@ -323,15 +389,21 @@ function validacion()
              "Content-Type": "application/json",
              "cache-control": "no-cache",
              "token": `${Cookies.get('token')}`, 
-             "id_usuario": `${Cookies.get('id_usuario')}`
+             "id_usuario": `${Cookies.get('id_usuario')}`, 
+             "id_tipo_de_usuario": `${Cookies.get('id_tipo_de_usuario')}`
            },
            "processData": false,                      
             success: function(data){    
             console.log(data); 
+            //Validación de permisos para registrar una mascota. 
+            if(data=="incorrecto")
+              mandar_a_perfil(); 
             //Parseamos la información. 
-             var obj = JSON.parse(data);     
+             var obj = JSON.parse(data);    
 
-             var nombre_cliente = `${obj[0]["nombres"]} ${obj[0]["apellido_paterno"]} ${obj[0]["apellido_materno"]}`; 
+
+             var nombre_cliente = `${obj[0]["nombres"]} ${obj[0]["apellido_paterno"]} ${obj[0]["apellido_materno"]}`;
+             
 
              //Guardamos el objeto de mascota. 
               var contenido_cliente = `${nombre_cliente} <span style="position: absolute; right: 10px;" onclick="window.location.href='../clientes/perfil_de_cliente.html?id=${obj[0]["id"]}'" class="fa fa-eye button_icon"></span>`; 
@@ -354,7 +426,7 @@ function validacion()
             </div>
             <!-- Contenido de la página --> 
             <div id="contenido_de_pagina" class="col-12 col-lg-10 contenido_de_pagina">
-              <div class="row">
+              <div id="div_tarjeta" class="row">
                     <div class="col-12">
                      <div class="row form-group div_row_tarjeta">
                         <div class="col-12 div_tarjeta_arriba_encabezado">
@@ -382,6 +454,13 @@ function validacion()
                                           </select>                                          
                                       </div>
                                       <div class="row form-group">
+                                        <div class="col-4 label_campo" style="text-align: right;">Esterilizado:</div>
+                                          <select id="esterilizado" class="col-7 form-control selectpicker" placeholder="genero">
+                                              <option value="Si">Si</option>
+                                              <option value="No">No</option>
+                                          </select>                                          
+                                      </div>
+                                      <div class="row form-group">
                                         <div class="col-4 label_campo" style="text-align: right;">Tipo de mascota:</div>
                                           <select id="id_tipo_de_mascota" onchange="llenar_razas()" class="col-7 form-control selectpicker" placeholder="Tipo de mascota">                                              
                                           </select>                                                                         
@@ -391,18 +470,22 @@ function validacion()
                                           <select id="id_raza" class="col-7 form-control selectpicker" placeholder="Raza">
                                           </select>                                                                         
                                       </div>
+                                      <div id="div_marca_recomendada" class="row form-group">
+                                       <div class="col-4 label_campo form-group" style="text-align: right;">Marca Recomendada:</div>
+                                       <select id="id_marca" class="col-7 form-control selectpicker" placeholder="Marca"></select>
+                                      </div>  
                                       <div class="row form-group">
                                         <div class="col-4 label_campo" style="text-align: right;">Dueño:</div>
                                           <div id="cliente" class="col-7 label_campo"></div>
-                                      </div>
+                                      </div>                                      
                                       <div class="row form-group" style="display: none;">
                                         <div class="col-4 label_campo" style="text-align: right;">estado: (No se muestra)</div>
                                           <input type="text" id="estado" class="col-7 form-control" placeholder="estado"/>    
                                       </div>                                      
                                       <div class="row justify-content-center form-group">
                                         <div class="col-6"></div>
-                                      <div class="col-4 btn_rectangle" onclick="insertar()">
-                                        Guardar Cambios                                        
+                                      <div id="div_guardar_cambios" class="col-4 btn_rectangle" onclick="insertar()">
+                                        Guardar Cambios                                    
                                       </div>
                                     </div>                                   
                                     <div class="row form-group">

@@ -13,7 +13,7 @@
       <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"></script>
       <!-- Latest compiled JavaScript -->
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
-      <title>48 Horas</title>
+      <title>Micrositio</title>
       <link href="https://fonts.googleapis.com/css?family=Work+Sans" rel="stylesheet">
       <!--Cargamos los íconos-->
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -23,6 +23,7 @@
       <script src="../../js/bootstrap-select.js"></script>
       <script src="../../js/cookie.js"></script>
       <script src="../../js/utilidades.js"></script>      
+<script src="../../js/pdfobject.min.js"></script>
       <link rel="stylesheet" href="../../css/estilos.css">
    </head>
 <div id="loading"></div>
@@ -161,10 +162,13 @@
              "cache-control": "no-cache",
              "token": `${Cookies.get('token')}`, 
              "id_usuario": `${Cookies.get('id_usuario')}`,
-"id_tipo_de_usuario": `${Cookies.get('id_tipo_de_usuario')}`,                                        
+             "id_tipo_de_usuario": `${Cookies.get('id_tipo_de_usuario')}`,                                        
            },
            "processData": false,                      
             success: function(data){    
+
+              if(data=="incorrecto")
+                mandar_a_perfil(); 
               
               
             //Limpiamos el contenido de las clientes.

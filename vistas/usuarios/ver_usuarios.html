@@ -18,7 +18,7 @@
       <!-- Latest compiled JavaScript -->
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
 
-      <title>48 Horas</title>
+      <title>Micrositio</title>
       <link href="https://fonts.googleapis.com/css?family=Work+Sans" rel="stylesheet">
 
       <!--Cargamos los íconos-->
@@ -33,6 +33,7 @@
 
       <script src="../../js/cookie.js"></script>
       <script src="../../js/utilidades.js"></script>      
+<script src="../../js/pdfobject.min.js"></script>
       <link rel="stylesheet" href="../../css/estilos.css">
       
    </head>
@@ -77,9 +78,11 @@
              "cache-control": "no-cache",
              "token": `${Cookies.get('token')}`, 
              "id_usuario": `${Cookies.get('id_usuario')}`,
+             "id_distribuidor": `${Cookies.get('id_distribuidor')}`,
              "id_tipo_de_usuario": `${Cookies.get('id_tipo_de_usuario')}`, 
              "pagina": `${pagina_actual}`, 
-             "nombre": `${$("#nombre_busqueda").val()}`
+             "nombre": `${$("#nombre_busqueda").val()}`, 
+             "modo" : ""
            },
            "processData": false,                      
             success: function(data){    
@@ -127,6 +130,7 @@
                                                     <div class='col-12 espaciado_estrecho titulo_de_tarjeta_md'>${obj[x]["usuario"]}</div>
                                                     <div class='col-12 espaciado_estrecho'>${obj[x]["ciudad"]}</div>
                                                     <div class='col-12 espaciado_estrecho form-group' style='color:gray'>${obj[x]["email"]}</div>
+                                                    <div class='col-12 espaciado_estrecho form-group' style='color:gray'><b>Distribuidor: </b>${obj[x]["distribuidor"]}</div>
                                                     <div class='col-12 espaciado_estrecho' style='font-size: 30px;'>${obj[x]["tipo_de_usuario"]}</div>
                                                 </div>
                                             </div>           
@@ -371,7 +375,7 @@
                     <div class="col-12">
                         <div class="row form-group justify-content-center">
                             <div class="col-12 col-xl-8 form-group">
-                              <input type="text" id="nombre_busqueda" class="input_white form-control" placeholder="Buscar por nombre o apellido..."/>
+                              <input type="text" id="nombre_busqueda" class="input_white form-control" placeholder="Buscar por nombre, correo electrónico, zona o distribuidor..."/>
                             </div>
                             <div id="div_registrar_profesional" class="col-xl-3 col-12 form-group">
                               <div class="btn_rectangle_secundario" onclick="window.location.href='./crear_usuario.html'">Registrar Profesional</div>

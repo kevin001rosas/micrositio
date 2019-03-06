@@ -14,7 +14,7 @@
       <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"></script>
       <!-- Latest compiled JavaScript -->
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
-      <title>48 Horas</title>
+      <title>Micrositio</title>
       <link href="https://fonts.googleapis.com/css?family=Work+Sans" rel="stylesheet">
       <!--Cargamos los íconos-->
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -24,15 +24,22 @@
       <script src="../../js/bootstrap-select.js"></script>
       <script src="../../js/cookie.js"></script>
       <script src="../../js/utilidades.js"></script>      
+<script src="../../js/pdfobject.min.js"></script>
       <link rel="stylesheet" href="../../css/estilos.css">
+      <script src="../../js/croppie.js"></script>
+      <link rel="stylesheet" href="../../css/croppie.css">
    </head>
 <div id="loading"></div>
    <script>
       var cliente = {};   
 
-      var url_foto = ""; 
-
       $(document).ready(function() {
+
+      $div_foto_original = "div_foto_original"; 
+      $div_foto_croppie = "div_foto_croppie"; 
+      $croppie_container = "croppie_container"; 
+      configurar_croppie(300, 300);
+
        llenar_menu(); 
        llenar_encabezado();        
        llenar_comboboxes(); 
@@ -40,8 +47,36 @@
         $("#button_ver_clientes" ).addClass("active");
         $("#foto_url").hover(poner_hover_foto, quitar_hover_foto);
        quitar_loading(); 
+       ocultar_campos(); 
        return; 
       });
+
+      function ocultar_campos()
+      {
+        if(Cookies.get('id_tipo_de_usuario')!=="1")
+        {
+          $("#div_estado_de_cliente").hide();  
+          $("#div_guardar_cambios").hide();
+        }
+      }
+
+      function mostrar_comentarios()
+      {
+        if($("#id_estado").val().toString()=="2")
+        {
+          $("#div_comentarios_de_invalidacion").show('slow'); 
+        }
+        else
+        {
+          $("#div_comentarios_de_invalidacion").hide('slow'); 
+        }
+        
+      }
+
+      function subir_imagen_clientes()
+      {
+        subir_imagen('foto_url', `${api_url}/clientes/uploadImage/${getIdFromURL()}`); 
+      }     
 
       function validacion()
       {      
@@ -180,6 +215,8 @@
         form.foto_url = cliente.foto_url;
         form.id_registrado_por = cliente.id_registrado_por;
         form.id_estado = $("#id_estado").val();
+        form.comentarios_de_invalidacion = $("#comentarios_de_invalidacion").val();
+
         console.log(form); 
 
          var settings = {
@@ -218,7 +255,8 @@
              "Content-Type": "application/json",
              "cache-control": "no-cache",
              "token": `${Cookies.get('token')}`, 
-             "id_usuario": `${Cookies.get('id_usuario')}`
+             "id_usuario": `${Cookies.get('id_usuario')}`, 
+             "id_tipo_de_usuario": `${Cookies.get('id_tipo_de_usuario')}`
            },
            "processData": false,                                 
             success: function(data){                
@@ -246,6 +284,8 @@
               cliente.id_estado = obj[0]["id_estado"]; 
               cliente.fecha_de_registro = obj[0]["fecha_de_registro"]; 
               cliente.fecha_de_modificacion = obj[0]["fecha_de_modificacion"]; 
+              cliente.comentarios_de_invalidacion = obj[0]["comentarios_de_invalidacion"]; 
+              
              
              //Fijamos el nombre de la raza. 
               $("#nombres").val(obj[0]["nombres"]); 
@@ -266,6 +306,8 @@
               $("#foto_url").val(obj[0]["foto_url"]);               
               $("#fecha_de_registro").val(obj[0]["fecha_de_registro"]); 
               $("#fecha_de_modificacion").val(obj[0]["fecha_de_modificacion"]); 
+              $("#comentarios_de_invalidacion").val(obj[0]["comentarios_de_invalidacion"]); 
+              
 
               //Actualizamos la ciudad. 
               $('#id_ciudad').selectpicker('val', obj[0]["id_ciudad"]);
@@ -288,8 +330,8 @@
                        obj[0]["foto_url"] = default_image_url;                       
                     }
                 });
-              url_foto = obj[0]["foto_url"];              
-              $("#foto_url").attr('src', url_foto);
+              $url_foto = obj[0]["foto_url"];              
+              $("#foto_url").attr('src', $url_foto);
               
 
               
@@ -317,7 +359,7 @@
       {
         //Quitamos la imagen del preview. 
         //alert("Sale"); 
-        $("#foto_url").attr('src', url_foto);        
+        $("#foto_url").attr('src', $url_foto);        
         
       }      
       
@@ -430,6 +472,7 @@
    <style>
    </style>
    <body>
+      <input style="display:none" type="file" id="file_picker_croppie" value="Choose Image" accept="image/*">
       <div class="container-fluid" >
       <div class="row" id="encabezado">
       </div>
@@ -474,18 +517,38 @@
                                        <div class="col-3 label_campo" style="text-align: right;">Email:</div>
                                        <input type="text" id="email" class="col-9 form-control" placeholder="Email"/>    
                                     </div>                                    
-                                    <div class="row form-group">
+                                    <div id="div_estado_de_cliente" class="row form-group">
                                        <div class="col-3 label_campo" style="text-align: right;">Estado:</div>
-                                       <select id="id_estado" class="col-9 form-control selectpicker" placeholder="Estado"></select>
+                                       <select id="id_estado" onchange="mostrar_comentarios()" class="col-9 form-control selectpicker" placeholder="Estado"></select>
                                     </div>
                                     <div class="row form-group">
                                        <div class="col-3 label_campo" style="text-align: right;">Fecha de Nacimiento:</div>
                                        <input type="date" id="fecha_de_nacimiento" class="col-9 form-control" placeholder="fecha_de_nacimiento"/>
                                     </div>
+                                    <div id="div_comentarios_de_invalidacion" class="row form-group">
+                                        <div class="col-3 label_campo" style="text-align: right;">Comentarios de invalidación:</div>
+                                          <textarea id="comentarios_de_invalidacion" class="form-control col-9" rows="4"></textarea>
+                                      </div>
                                  </div>
                                  
                                   <div class="col-12 col-lg-5" style="text-align: center;">
-                                        <img id="foto_url" class="button_imagen" src='' style='cursor: pointer;height:450px;width: auto; padding-top: 15px; '>
+                                      <div class="row" style="padding-top: 60px;">
+                                        <div id="div_foto_original" class="col-12">
+                                          <img onclick="seleccionar_imagen();" id="foto_url" class="button_imagen" src='' style='cursor: pointer;height:350px;width: auto;'/>
+                                        </div>
+                                        <div id="div_foto_croppie" style="display: none;" class="col-12">
+                                          <div class="row">
+                                            <div class="col-12">
+                                              <img id="croppie_container" style='cursor: pointer;height:350px;width: auto;'/>   
+                                            </div>
+                                          </div>
+                                          <div class="row justify-content-center">
+                                            <div class="col-10">
+                                              <div class="btn_rectangle" onclick="subir_imagen_clientes()">Cortar</div>
+                                            </div>
+                                          </div>                                            
+                                          </div>                                          
+                                        </div>
                                  </div>
                                  
                               </div>
@@ -522,7 +585,7 @@
                                        <div class="col-3 label_campo" style="text-align: right;">Número:</div>
                                        <input type="text" id="numero" class="col-9 form-control" placeholder="Número"/>    
                                     </div>
-                                    <div class="row form-group">
+                                    <div id="div_guardar_cambios" class="row form-group">
                                        <div class="col-3"></div>
                                        <div class="col-9 btn_rectangle" onclick="actualizar()">Guardar Cambios</div>
                                     </div>

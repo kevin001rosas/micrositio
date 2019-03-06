@@ -23,26 +23,22 @@
       <script src="../../js/bootstrap-select.js"></script>
       <script src="../../js/cookie.js"></script>
       <script src="../../js/utilidades.js"></script>      
-      <script src="../../js/pdfobject.min.js"></script>
+<script src="../../js/pdfobject.min.js"></script>
       <link rel="stylesheet" href="../../css/estilos.css">
-      <script src="../../js/croppie.js"></script>
-      <link rel="stylesheet" href="../../css/croppie.css">
    </head>
 <div id="loading"></div>
    <script>
-
-      var rechazado = false; 
       var cliente = {};   
-      var ciudades_lista = {}; 
+
+      var url_foto = ""; 
 
       $(document).ready(function() {
+        
+        ocultar_campos_de_administrador(); 
 
-      $div_foto_original = "div_foto_original"; 
-      $div_foto_croppie = "div_foto_croppie"; 
-      $croppie_container = "croppie_container"; 
-      configurar_croppie(300, 300);
 
-       ocultar_campos_de_administrador(); 
+
+
        llenar_menu(); 
        llenar_encabezado();        
        llenar_comboboxes(); 
@@ -55,40 +51,6 @@
        return; 
       });
 
-      function seleccionar_distribuidor()
-      { 
-        for (const index in ciudades_lista) 
-        { 
-          if($("#id_ciudad").val()==ciudades_lista[index].id)          
-          {
-            //Seleccionamos el distribuidor correcto. 
-            $("#id_distribuidor").val(ciudades_lista[index].id_distribuidor);
-            $("#id_distribuidor").selectpicker('refresh');
-            return; 
-          }
-
-        }
-
-      }      
-
-      function cambiar_contraseña()
-      {
-        //Mandamos el usuario a la ventana para cambiar la contraseña. 
-        window.location.href = `./cambiar_contraseña.html?id=${getIdFromURL()}`;
-      }
-
-      function subir_imagen_usuarios()
-      {
-        subir_imagen('foto_url', `${api_url}/usuarios/uploadImage/${getIdFromURL()}`); 
-         //En caso de estar actualizando la foto de su perfil, actualizamos las cookies de foto_url
-         if(Cookies.get("id_usuario")==getIdFromURL())
-         {
-          var url_temporal = api_url.replace("api/", "/") + `/temp/usuarios/${getIdFromURL()}.jpg`;
-          Cookies.set("foto_url", url_temporal);            
-         }
-        
-      }      
-
       function mostrar_mensaje_completar_datos()
       {
         if(Cookies.get("datos_completos")==="0")
@@ -98,77 +60,16 @@
         }
       }
 
-      function rechazar()
-      {
-        rechazado = true;
-        //Seleccionamos la opción de rechazado en el select. 
-        $("#id_estado_de_usuario").val("4");
-        $("#id_estado_de_usuario").selectpicker('refresh');
-        actualizar();
-      }
-
-      function activar()
-      {
-        //Seleccionamos la opción de Activo en el select. 
-        $("#id_estado_de_usuario").val("1");
-        $("#id_estado_de_usuario").selectpicker('refresh');
-        actualizar(); 
-      }
-
       function ocultar_campos_de_administrador()
       {
-          //Si el usuario no es administrador , ocultamos los campos que no son de interés.           
-          if((Cookies.get('id_tipo_de_usuario')==="2")
-          ||(Cookies.get('id_tipo_de_usuario')==="3")
-          ||(Cookies.get('id_tipo_de_usuario')==="4"))
+          //Si el usuario no es administrador, ocultamos los campos que no son de interés.           
+          if(Cookies.get('id_tipo_de_usuario')!=="1")
           {            
-            //Ocultamos Marca recomendada. 
-            $("#div_marca_recomendada").hide(); 
-
-            //Ocultamos Planes. 
-            $("#div_botones_distribuidor").hide(); 
-
-            if(Cookies.get("id_usuario")!=getIdFromURL())
-            {
-              $("#div_botones_administrador").hide(); 
-              $("#div_cambiar_contraseña").hide(); 
-            }
-            //$("#div_zona").hide(); 
-
-            //Ocultamos Zona. 
-            $("#div_distribuidor").hide(); 
-
-            //Ocultamos Distribuidor. 
-            $("#div_planes").hide(); 
-
-            //Oculamos el tipo de usuario
-            $("#div_tipo_de_usuario").hide(); 
-
-            //Ocultamos el catálogo de estados. 
-            $("#div_estados_de_usuario").hide(); 
-            
-          }   
-
-          //En caso de ser administrador, ocultamos el botón de rechazar. 
-          if(Cookies.get('id_tipo_de_usuario')==='1')
-          {
-            $("#div_botones_distribuidor").hide();
-          }
-
-          //El usuario distribuidor solo podrá rechazar o aceptar las solicitudes de accesos.
-          if(Cookies.get('id_tipo_de_usuario')==='5')
-          {
             //Ocultamos Marca recomendada. 
             //$("#div_marca_recomendada").hide();
 
             //Ocultamos Planes. 
             //$("#div_zona").hide(); 
-
-            $("#div_cambiar_contraseña").hide(); 
-
-            $("#div_botones_administrador").hide(); 
-
-            $("#boton_guardar_cambios").html("Activar Profesional"); 
 
             //Ocultamos Zona. 
             $("#div_distribuidor").hide(); 
@@ -178,34 +79,20 @@
 
             //Oculamos el tipo de usuario
             $("#div_tipo_de_usuario").hide(); 
-
-            //Ocultamos el catálogo de estados. 
-            $("#div_estados_de_usuario").hide(); 
-            return; 
-
+            
           }
       }
 
 function validacion()
       {      
-        $("#errores").hide(); 
-        $('html,body').animate({
-                       scrollTop: $("#errores").offset().bottom},'slow');
-
-
-        if($("#id_distribuidor").val()===null)
-        {
-          mostrar_errores("errores", "Por favor, selecciona un distribuidor para continuar"); 
-          return false; 
-        }
         
+
         if($("#nombres").val().trim()==="") 
         {
           $("#errores").html("Por favor, especifica un nombre para el Profesional."); 
           $("#errores").show("slow");              
           return false; 
         }
-        
         if($("#apellido_paterno").val().trim()==="") 
         {
           $("#errores").html("Por favor, especifica un apellido paterno para el Profesional."); 
@@ -237,69 +124,36 @@ function validacion()
           return false; 
         }
 
-        if(Cookies.get('id_tipo_de_usuario')!="1")
+        if($("#establecimiento").val().trim()==="") 
         {
-          if($("#establecimiento").val().trim()==="") 
-          {
-            $("#errores").html("Por favor, especifica un Establecimiento para el Profesional."); 
-            $("#errores").show("slow");              
-            return false; 
-          }        
-        }
+          $("#errores").html("Por favor, especifica un email para el Profesional."); 
+          $("#errores").show("slow");              
+          return false; 
+        }        
         
-        if(Cookies.get('id_tipo_de_usuario')!="1")
+        if($("#delegacion").val().trim()==="") 
         {
-          if($("#delegacion").val().trim()==="") 
-          {
-            $("#errores").html("Por favor, especifica una delegación para el Profesional."); 
-            $("#errores").show("slow");              
-            return false; 
-          }
+          $("#errores").html("Por favor, especifica una delegación para el Profesional."); 
+          $("#errores").show("slow");              
+          return false; 
         }
-        if(Cookies.get('id_tipo_de_usuario')!="1")
+        if($("#colonia").val().trim()==="") 
         {
-          if($("#colonia").val().trim()==="") 
-          {
-            $("#errores").html("Por favor, especifica una colonia para el Profesional."); 
-            $("#errores").show("slow");              
-            return false; 
-          }
+          $("#errores").html("Por favor, especifica una colonia para el Profesional."); 
+          $("#errores").show("slow");              
+          return false; 
         }
-        if(Cookies.get('id_tipo_de_usuario')!="1")
+        if($("#calle").val().trim()==="") 
         {
-          if($("#calle").val().trim()==="") 
-          {
-            $("#errores").html("Por favor, especifica una calle para el Profesional."); 
-            $("#errores").show("slow");              
-            return false; 
-          }
+          $("#errores").html("Por favor, especifica una calle para el Profesional."); 
+          $("#errores").show("slow");              
+          return false; 
         }
-        if(Cookies.get('id_tipo_de_usuario')!="1")
+        if($("#numero").val().trim()==="") 
         {
-          if($("#numero").val().trim()==="") 
-          {
-            $("#errores").html("Por favor, especifica un número de calle para el Profesional."); 
-            $("#errores").show("slow");              
-            return false; 
-          }
-        }
-
-        if(Cookies.get('id_tipo_de_usuario')!="1")
-        {
-          if($("#codigo_postal").val().trim()==="") 
-          {
-            mostrar_errores("errores", "Por favor, introduce un código postal.")            
-            return false; 
-          }
-        }
-
-        if(Cookies.get('id_tipo_de_usuario')!="1")
-        {
-          if($("#sitio_web").val().trim()==="") 
-          {
-            mostrar_errores("errores", "Por favor, introduce un sitio web.")            
-            return false; 
-          }
+          $("#errores").html("Por favor, especifica un número de calle para el Profesional."); 
+          $("#errores").show("slow");              
+          return false; 
         }
 
         if(telefono_local_valido($("#telefono_local").val())==false)
@@ -357,18 +211,10 @@ function validacion()
             return false;                             
         }
 
-        
-
         if(numero_valido($("#cantidad_raza_3").val())==false)
         {
             $("#errores").html("Por favor, introduce una cantidad válida para los Ejemplares en Instalaciones."); 
             $("#errores").show("slow");              
-            return false;                             
-        }
-
-        if(numero_valido($("#camadas_al_anio").val())==false)
-        {
-            mostrar_errores("erores", "Por favor, introduce una cantidad válida las camadas al año.");             
             return false;                             
         }
 
@@ -404,8 +250,6 @@ function validacion()
         form.id_ciudad = $("#id_ciudad").val();
         form.id_distribuidor = $("#id_distribuidor").val();
         form.id_marca = $("#id_marca").val();
-        form.sitio_web = $("#sitio_web").val();
-        form.camadas_al_anio = $("#camadas_al_anio").val();
         
         form.email = $("#email").val();
         form.estado = $("#estado").val();        
@@ -422,13 +266,7 @@ function validacion()
         form.cantidad_raza_2 = $("#cantidad_raza_2").val();
         form.cantidad_raza_3 = $("#cantidad_raza_3").val();
 
-        form.cantidad_raza_3 = $("#camadas_al_anio").val();
-
-        form.id_estado_de_usuario = $("#id_estado_de_usuario").val();
-
-
-
-        //console.log(form); 
+        console.log(form); 
 
          var settings = {
            "async": false,
@@ -448,11 +286,7 @@ function validacion()
          $.ajax(settings).done(function (response) {
            //Regresamos a la ventana para ver los tipos de mascota. 
            Cookies.set("datos_completos", "1"); 
-
-           if(rechazado==true)
-            window.location.href = `${base_url}/vistas/usuarios/ver_usuarios.html`;
-          else
-            window.location.href = `${base_url}/vistas/usuarios/perfil_de_usuario.html?id=${getIdFromURL()}`;
+           window.location.href = `${base_url}/vistas/usuarios/perfil_de_usuario.html?id=${getIdFromURL()}`;  
          });         
       }      
 
@@ -471,21 +305,14 @@ function validacion()
              "Content-Type": "application/json",
              "cache-control": "no-cache",
              "token": `${Cookies.get('token')}`, 
-             "id_usuario": `${Cookies.get('id_usuario')}`, 
-             "id_tipo_de_usuario": `${Cookies.get('id_tipo_de_usuario')}`, 
-             "id_distribuidor": `${Cookies.get('id_distribuidor')}`
+             "id_usuario": `${Cookies.get('id_usuario')}`
            },
            "processData": false,                                 
             success: function(data){   
-              if(data=="incorrecto")
-              {
-                mandar_a_perfil(); 
-                return; 
-              }
 
             //Parseamos la información. 
              var obj = JSON.parse(data);                    
-             //console.log(obj); 
+             console.log(obj); 
 
              //Guardamos el objeto de mascota. 
               cliente.nombres = obj[0]["nombres"]; 
@@ -510,11 +337,9 @@ function validacion()
               cliente.fecha_de_registro = obj[0]["fecha_de_registro"]; 
               cliente.fecha_de_modificacion = obj[0]["fecha_de_modificacion"]; 
               cliente.micrositio = obj[0]["micrositio"]; 
-              cliente.sitio_web = obj[0]["sitio_web"]; 
               
               cliente.c48_horas = obj[0]["c48_horas"]; 
               cliente.id_marca = obj[0]["id_marca"]; 
-              cliente.camadas_al_anio = obj[0]["camadas_al_anio"]; 
              
              //Fijamos el nombre de la raza. 
               $("#nombres").val(obj[0]["nombres"]); 
@@ -535,8 +360,8 @@ function validacion()
               $("#foto_url").val(obj[0]["foto_url"]);               
               $("#fecha_de_registro").val(obj[0]["fecha_de_registro"]); 
               $("#fecha_de_modificacion").val(obj[0]["fecha_de_modificacion"]); 
-              $("#sitio_web").val(obj[0]["sitio_web"]);         
-              $("#camadas_al_anio").val(obj[0]["camadas_al_anio"]);         
+              
+
 
               $('#c48_horas').attr('checked', obj[0]["c48_horas"].toString() === "1" ? true : false);
               $('#micrositio').attr('checked', obj[0]["micrositio"].toString() === "1" ? true : false);
@@ -544,9 +369,6 @@ function validacion()
               //Actualizamos la ciudad. 
               $('#id_ciudad').selectpicker('val', obj[0]["id_ciudad"]);
               $("#id_ciudad").selectpicker('refresh'); 
-
-              $('#id_estado_de_usuario').selectpicker('val', obj[0]["id_estado_de_usuario"]);
-              $("#id_estado_de_usuario").selectpicker('refresh'); 
 
               $('#id_marca').selectpicker('val', obj[0]["id_marca"]);
               $("#id_marca").selectpicker('refresh'); 
@@ -597,9 +419,8 @@ function validacion()
                     }
                 });
 
-              $url_foto = obj[0]["foto_url"];              
-
-              $("#foto_url").attr('src', $url_foto);
+              url_foto = obj[0]["foto_url"];
+              $("#foto_url").attr('src', url_foto);
               
            }
            , error: function() {
@@ -625,68 +446,18 @@ function validacion()
       {
         //Quitamos la imagen del preview. 
         //alert("Sale"); 
-        $("#foto_url").attr('src', $url_foto);        
+        $("#foto_url").attr('src', url_foto);        
         
       }      
       
             
       function llenar_comboboxes()
       {
+        llenar_ciudades(); 
         llenar_distribuidores(); 
-        llenar_ciudades();         
         llenar_marcas(); 
         llenar_tipos_de_usuario(); 
         llenar_tipos_de_mascota();         
-        llenar_distribuidores(); 
-        llenar_estados_de_usuario(); 
-      }
-
-      function llenar_estados_de_usuario()
-      {
-        contador_solicitudes++; 
-        var settings = {
-           "async": false,
-           "crossDomain": true,
-           "url": `${api_url}/estadosdeusuario`, 
-           "method": "GET",
-           "headers": {
-             "Content-Type": "application/json",
-             "cache-control": "no-cache",
-             "token": `${Cookies.get('token')}`, 
-             "id_usuario": `${Cookies.get('id_usuario')}`, 
-             "id_tipo_de_usuario": `${Cookies.get('id_tipo_de_usuario')}`
-           },
-           "processData": false,              
-            success: function(data){    
-            ////console.log(data); 
-            //Parseamos la información. 
-             var obj = JSON.parse(data);        
-      
-             //Limpiamos el contenido actual 
-             $("#id_estado_de_usuario").html("");
-             var nuevo_contenido = ""; 
-      
-             //Llenamos las nuevas opciones. 
-             for (var x =  0; x < obj.length; x++) 
-             {
-               var id = obj[x]["id"]; 
-               var nombre = obj[x]["nombre"];                
-               nuevo_contenido += `<option value="${id}">${nombre}</option>`; 
-             }
-      
-             $("#id_estado_de_usuario").html(nuevo_contenido);   
-             //Seleccinamos la primera opción
-             $('#id_estado_de_usuario').selectpicker('val', $("#id_estado_de_usuario option:first").val());
-             $("#id_estado_de_usuario").selectpicker('refresh'); 
-           }
-            , error: function(data) {
-               //Volvemos a invocar la función. 
-               if(contador_solicitudes<7)
-                llenar_estados_de_usuario();                
-            }
-         }
-      
-         $.ajax(settings);         
       }
 
       function llenar_razas(numero)
@@ -708,7 +479,7 @@ function validacion()
            },
            "processData": false,                      
             success: function(data){    
-            //console.log(data); 
+            console.log(data); 
             //Parseamos la información. 
              var obj = JSON.parse(data);                    
                    
@@ -755,7 +526,7 @@ function validacion()
            },
            "processData": false,                      
             success: function(data){
-            //console.log(data); 
+            console.log(data); 
             //Parseamos la información. 
              var obj = JSON.parse(data);                
 
@@ -823,7 +594,7 @@ function validacion()
            },
            "processData": false,                      
             success: function(data){
-            //console.log(data);
+            console.log(data);
             //Parseamos la información. 
              var obj = JSON.parse(data);
       
@@ -843,7 +614,6 @@ function validacion()
              //Seleccinamos la primera opción 
              $('#id_marca').selectpicker('val', $("#id_marca option:first").val());
              $("#id_marca").selectpicker('refresh'); 
-                
 
            }
            , error: function() {
@@ -872,7 +642,7 @@ function validacion()
            },
            "processData": false,                      
             success: function(data){    
-            ////console.log(data); 
+            //console.log(data); 
             //Parseamos la información. 
              var obj = JSON.parse(data);                
       
@@ -885,14 +655,6 @@ function validacion()
              //Llenamos las nuevas opciones. 
              for (var x =  0; x < obj.length; x++) 
              {
-
-               ciudades_lista[x] = {}; 
-
-               //Guardamos a las ciudades en una lista automáticamente. 
-               ciudades_lista[x].id = obj[x]["id"]; 
-               ciudades_lista[x].nombre = obj[x]["nombre"];
-               ciudades_lista[x].id_distribuidor = obj[x]["id_distribuidor"]; 
-
                var id = obj[x]["id"]; 
                var nombre = obj[x]["nombre"];                
                nuevo_contenido += `<option value="${id}">${nombre}</option>`; 
@@ -929,7 +691,7 @@ function validacion()
            },
            "processData": false,                      
             success: function(data){    
-            ////console.log(data); 
+            //console.log(data); 
             //Parseamos la información. 
              var obj = JSON.parse(data);                
       
@@ -978,7 +740,7 @@ function validacion()
            },
            "processData": false,              
             success: function(data){    
-            ////console.log(data); 
+            //console.log(data); 
             //Parseamos la información. 
              var obj = JSON.parse(data);        
       
@@ -1015,7 +777,6 @@ function validacion()
    <style>
    </style>
    <body>
-      <input style="display:none" type="file" id="file_picker_croppie" value="Choose Image" accept="image/*">
       <div class="container-fluid" >
       <div class="row" id="encabezado">
       </div>
@@ -1037,7 +798,7 @@ function validacion()
                               <div class="row">
                                 <div class="col-12 error form-group" id="mensaje_completar_datos">
                                 </div>
-                                 <div class="col-12 col-xl-7">
+                                 <div class="col-12">
                                     <div class="row form-group">
                                        <div class="col-3 label_campo" style="text-align: right;">Nombres:</div>
                                        <input type="text" id="nombres" class="col-9 form-control" placeholder="Nombres"/>    
@@ -1066,16 +827,8 @@ function validacion()
                                        <div class="col-3 label_campo" style="text-align: right;">Establecimiento:</div>
                                        <input type="text" id="establecimiento" class="col-9 form-control" placeholder="Establecimiento"/>    
                                     </div>
-                                    <div class="row form-group">
-                                       <div class="col-3 label_campo" style="text-align: right;">Sitio Web/Facebook:</div>
-                                       <input type="text" id="sitio_web" class="col-9 form-control" placeholder="Sitio Web"/>    
-                                    </div>
-                                    <div class="row form-group">
-                                       <div class="col-3 label_campo" style="text-align: right;">Camadas al Año:</div>
-                                       <input type="number" id="camadas_al_anio" class="col-9 form-control" placeholder="Camadas al Año"/>    
-                                    </div>
                                     <div id="div_tipo_de_usuario" class="row form-group">
-                                       <div class="col-3 label_campo" style="text-align: right;">Tipo de Usuario:</div>
+                                       <div class="col-3 label_campo" style="text-align: right;">Tipo de Usario:</div>
                                        <select id="id_tipo_de_usuario" class="col-9 form-control selectpicker" placeholder="Tipo de Usuario"></select>
                                     </div>
                                     <div class="row form-group">
@@ -1088,22 +841,13 @@ function validacion()
                                     </div>  
                                     <div id="div_zona" class="row form-group">
                                        <div class="col-3 label_campo" style="text-align: right;">Zona:</div>
-                                       <select onchange="seleccionar_distribuidor()" id="id_ciudad" class="col-9 form-control selectpicker" placeholder="Zona"></select>
-                                    </div>                                            
+                                       <select id="id_ciudad" class="col-9 form-control selectpicker" placeholder="Zona"></select>
+                                    </div>
                                      <div id="div_distribuidor" class="row form-group">
                                        <div class="col-3 label_campo" style="text-align: right;">Distribuidor:</div>
                                        <select id="id_distribuidor" class="col-9 form-control selectpicker" placeholder="Distribuidor"></select>
                                     </div>        
-                                    <div id="div_estados_de_usuario" class="row form-group">
-                                       <div class="col-3 label_campo" style="text-align: right;">Estado de Profesional:</div>
-                                       <select id="id_estado_de_usuario" class="col-9 form-control selectpicker" placeholder="Estado"></select>
-                                    </div>
-                                    <div id="div_cambiar_contraseña" class="row form-group">
-                                      <div class="col-3"> </div>
-                                       <div class="col-9 btn_rectangle" onclick="cambiar_contraseña()">
-                                         Cambiar Contraseña
-                                       </div>                                       
-                                    </div>        
+
                                     <div id="div_planes" class="row form-group">
                                       <div class="col-3 label_campo" style="text-align: right;">
                                       </div>
@@ -1120,27 +864,6 @@ function validacion()
                                         </label>
                                       </div>
                                     </div>                                    
-                                 </div>
-                                 
-                                  <div class="col-12 col-lg-5" style="text-align: center;">
-                                      <div class="row" style="padding-top: 60px;">
-                                        <div id="div_foto_original" class="col-12">
-                                          <img onclick="seleccionar_imagen();" id="foto_url" class="button_imagen" src='' style='cursor: pointer;height:350px;width: auto;'/>
-                                        </div>
-                                        <div id="div_foto_croppie" style="display: none;" class="col-12">
-                                          <div class="row">
-                                            <div class="col-12">
-                                              <img id="croppie_container" style='cursor: pointer;height:350px;width: auto;'/>   
-                                            </div>
-                                          </div>
-                                          <div class="row justify-content-center">
-                                            <div class="col-10">
-                                              <div class="btn_rectangle" onclick="subir_imagen_usuarios()">Cortar</div>
-                                            </div>
-                                          </div>
-                                            
-                                          </div>                                          
-                                        </div>
                                  </div>
                               </div>
                            </div>
@@ -1186,8 +909,6 @@ function validacion()
                               </div>
                                  </div>
                               </div>
-
-
                               <div class="row form-group">
                                  <div class="col-12 letra_encabezado_naranja">Dirección:</div>
                               </div>
@@ -1201,10 +922,6 @@ function validacion()
                                        <div class="col-3 label_campo" style="text-align: right;">Colonia:</div>
                                        <input type="text" id="colonia" class="col-9 form-control" placeholder="Colonia"/>    
                                     </div>
-                                    <div class="row form-group">
-                                       <div class="col-3 label_campo" style="text-align: right;">Código Postal:</div>
-                                       <input type="text" id="codigo_postal" class="col-9 form-control" placeholder="Código Postal"/>    
-                                    </div>
                                  </div>
                                  <div class="col-6">
                                     <div class="row form-group">
@@ -1214,20 +931,15 @@ function validacion()
                                     <div class="row form-group">
                                        <div class="col-3 label_campo" style="text-align: right;">Número:</div>
                                        <input type="text" id="numero" class="col-9 form-control" placeholder="Número"/>    
-                                    </div>                                    
+                                    </div>                                                                        
                                  </div>
                               </div>
-                              <div id="div_botones_distribuidor" class="row form-group justify-content-center">
-                                 <div class="col-5">
-                                 <div class="btn_rectangle_secundario" onclick="rechazar()">Rechazar</div>
+                              <div class="row form-group justify-content-center">                                 
+                                <div class="col-4">
+                                  <div class="btn_rectangle_secundario" onclick="rechazar()">Rechazar</div>
                                  </div>
-                                 <div class="col-5">
-                                 <div class="btn_rectangle" onclick="activar()">Activar</div>
-                                 </div>                                 
-                              </div>
-                              <div id="div_botones_administrador" class="row form-group justify-content-center">
-                                 <div class="col-5">
-                                 <div class="btn_rectangle" onclick="actualizar()">Guardar Cambios</div>
+                                 <div class="col-4">
+                                  <div class="btn_rectangle" onclick="actualizar()">Activar</div>
                                  </div>                                 
                               </div>
                            </div>

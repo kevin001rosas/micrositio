@@ -3,25 +3,116 @@
   var cantidad_elementos_por_pagina = 8; 
   var contador_solicitudes = 0; 
   var cantidad_maxima_solicitudes = 7; 
-  //var base_url = "http://micrositioroyalcanin.tk/"; 
+  //var base_url = "http://micrositioroyalcanin.com.mx/"; 
   var base_url = "http://localhost/48_horas/"; 
-  //var api_url = "http://api.xik.mx/api/"; 
+  //var api_url = "http://apiRoyalCaninProduccion.xik.mx/api/"; 
   var api_url = "http://localhost:5003/api/"; 
-  //var default_image_url = "http://micrositioroyalcanin.tk/images/camera.png"; 
-  var default_image_url = "http://localhost/48_horas/images/camera.png"; 
+  var default_image_url = `${base_url}/images/camera.png`;   
 
-  $(document).ready(function() {                    
+  $(document).ready(function() {
           validar_accesos(); 
 
           //En caso de no ser un administrador, ocultaremos los botones de
           // descargar profesionales, certificados (clientes) y mascotas.
           if(Cookies.get("id_tipo_de_usuario")!=="1")
           {
-            $("#div_descargar").hide(); 
+            $("#div_descargar").hide();
             $("#div_registrar_profesional").hide(); 
           }
 
         });
+
+  function mandar_a_perfil()
+  {
+    window.location.href=`${base_url}/vistas/usuarios/perfil_de_usuario.html?id=${Cookies.get('id_usuario')}`; 
+  }
+
+    function subir_imagen(element_id, url)
+    {
+            $uploadCroppedPhoto.croppie('result', {
+                type: 'canvas',
+                size: 'viewport'
+            }).then(function (resp) {
+
+            
+            this.picture = $("#" + element_id);
+            this.picture.attr('src', resp);
+            $url_foto = resp; 
+            //En resp esta la imagen en Base 64. 
+            $("#" + $div_foto_croppie).hide(); 
+            $("#" + $div_foto_original).show("slow"); 
+
+            form = {}; 
+            form.foto_url = resp; 
+
+            //Hacemos la solicitud Ajax para subir la imagen. 
+            var settings = {
+           "async": false,
+           "crossDomain": true,
+           "url": `${url}`, 
+           "method": "POST",
+           "headers": {
+             "Content-Type": "application/json",
+             "cache-control": "no-cache",
+             "token": `${Cookies.get('token')}`, 
+             "id_usuario": `${Cookies.get('id_usuario')}`
+           },
+           "processData": false,
+           "data": JSON.stringify(form)
+         }
+      
+         $.ajax(settings).done(function (data)
+          {
+            //alert(data); 
+
+          }); 
+        
+            });
+    }
+
+    function configurar_croppie(width, height)
+    {
+        var settings = {
+            enableExif: true,
+            viewport: {
+                width: width,
+                height: height,
+                type: 'circle'
+            },
+            boundary: {
+                width: width + 50,
+                height: height + 50
+            }
+        }; 
+        $uploadCroppedPhoto = $('#' + $croppie_container).croppie(settings);
+
+        //Configuración de evento para leer la imagen. 
+        $('#file_picker_croppie').change(function(){          
+          readFile(this);          
+          $("#" + $div_foto_original).hide(); 
+          $("#" + $div_foto_croppie).show(); 
+        });
+        
+    } 
+    
+    function seleccionar_imagen()
+{
+    $('#file_picker_croppie').trigger('click');
+}
+
+    function readFile(input) {
+  if (input.files && input.files[0]) {
+    var reader = new FileReader();
+
+    reader.onload = function (e) {
+      $('#' + $croppie_container).croppie('bind', {
+        url: e.target.result
+      });
+    }
+
+    reader.readAsDataURL(input.files[0]);
+  }
+}   
 
 function validar_accesos()
         {
@@ -31,7 +122,12 @@ function validar_accesos()
             if(Cookies.get('id_usuario')==null)
             {
                 //En este caso no ha iniciado sesión. Lo mandamos al Index. 
-              if(!((filename==="index.html")||(filename==="")))
+              if(!(
+                (filename==="index.html")
+                ||(filename==="")
+                ||(filename==="pre_registro.html")
+                )
+                )
               {                
                 window.location.href = `${base_url}`; 
               }          
@@ -100,7 +196,23 @@ function validar_accesos()
             Cookies.set('acuerdos_leidos', obj[0]["acuerdos_leidos"]);
             Cookies.set('nombres_de_usuario', obj[0]["nombres_de_usuario"]);
             Cookies.set('tipo_de_usuario', obj[0]["tipo_de_usuario"]);
+            Cookies.set('id_distribuidor', obj[0]["id_distribuidor"]);
+            Cookies.set('distribuidor', obj[0]["distribuidor"]);
             Cookies.set('datos_completos', obj[0]["datos_completos"]);
+            Cookies.set('c48_horas', obj[0]["c48_horas"]);            
+
+            isUrlExists(obj[0]["foto_url"], function(status){
+                    if(status === 200){
+                       // file was found                   
+                    }
+                    else if(status === 404){
+                       // 404 not found
+                       obj[0]["foto_url"] = default_image_url;                       
+                    }
+                });
+
+            Cookies.set('foto_url', obj[0]["foto_url"]);
+            
             location.reload(); 
 
            }
@@ -123,8 +235,8 @@ function validar_accesos()
       Cookies.remove('token');
       Cookies.remove('id_tipo_de_usuario')
 
-      //Cargamos nuevamente la página. 
-      location.reload(); 
+      //Lo mandamos al index
+      window.location.href = base_url; 
     }  
 
     
@@ -225,9 +337,17 @@ function validar_accesos()
          return correo_bool; 
       }
 
+      function mostrar_errores(id_elemento, mensaje)
+      {
+        $("#" + id_elemento).hide(); 
+        $('html,body').animate({
+                       scrollTop: $("#" + id_elemento).offset().bottom},'slow');
+        $("#" + id_elemento).html(mensaje); 
+         $("#" + id_elemento).show("slow");                                      
+      }
+
       function correo_usuario_inexistente(correo)
       {
-
         $("#loading").show(); 
         //Es un correo válido, no existe en la base de datos. 
         contador_solicitudes++;
@@ -256,8 +376,8 @@ function validar_accesos()
                 //Parseamos la información. 
                 var obj = JSON.parse(data);                
                
-                usuario_buscado = obj[0]["cliente"]; 
-                id_usuario_buscado = obj[0]["id"];
+                cliente_buscado = obj[0]["cliente"]; 
+                id_cliente_buscado = obj[0]["id"];
               }
            }
            , error: function() { }
@@ -309,18 +429,6 @@ function validar_accesos()
     return id;
   }
 
-    function habilitar_guardar_cambios()
-      {
-
-       if(Cookies.get('id_usuario')!==getValueFromUrl("id"))
-       {
-          //Si el usuario no es administrador, lo ocultamos. 
-          if(Cookies.get('id_tipo_de_usuario')!=="1")
-          {
-            $("#div_guardar_cambios").hide(); 
-          }
-       }      
-      }  
 
 function quitar_loading()
 {
@@ -332,11 +440,17 @@ function poner_loading()
   $("#loading").show(); 
 }  
 
-function descargar_de_url(url)
+function descargar_de_url(url, modo)
 {
   var request = new XMLHttpRequest();
     request.open('GET', url, true);
     request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+
+    request.setRequestHeader('id_usuario', Cookies.get('id_usuario'));
+    request.setRequestHeader('id_tipo_de_usuario', Cookies.get('id_tipo_de_usuario'));
+    request.setRequestHeader('modo', modo);
+    request.setRequestHeader('id_distribuidor', Cookies.get('id_distribuidor'));
+
     request.responseType = 'blob';
 
     request.onload = function() {
@@ -371,44 +485,67 @@ function descargar_de_url(url)
 
   function descargar_clientes()
   {
-    descargar_de_url(`${api_url}/descargas/getClientes`); 
+    descargar_de_url(`${api_url}/descargas/getClientes`, ""); 
   }
 
   function descargar_kits()
   {
-    descargar_de_url(`${api_url}/descargas/getKits`); 
+    descargar_de_url(`${api_url}/descargas/getKits`, ""); 
   }
 
   function descargar_usuarios()
   {
-    descargar_de_url(`${api_url}/descargas/getUsuarios`); 
+    descargar_de_url(`${api_url}/descargas/getUsuarios`, "");
+  }
+
+  function descargar_solicitudes_de_acceso()
+  {
+    descargar_de_url(`${api_url}/descargas/getUsuarios`, "solicitados");
   }
 
   function descargar_mascotas()
   {
-    descargar_de_url(`${api_url}/descargas/getMascotas`); 
+    descargar_de_url(`${api_url}/descargas/getMascotas`, ""); 
   }
 
   function llenar_encabezado()
   {
+
+    var tipo_de_usuario = ""; 
+
+    if(Cookies.get('id_tipo_de_usuario')=="1")
+    {
+      tipo_de_usuario = `(${Cookies.get("tipo_de_usuario")})`; 
+    }
+    else
+    {
+      tipo_de_usuario = `(${Cookies.get("tipo_de_usuario")}, ${Cookies.get('distribuidor')})`;
+    }
+
     var contenido_encabezado = 
     //Esconde en dispositivos más pequeños que md
 `            <div class='d-none d-lg-block col-2 col-xm-2 encabezado_inicio'>` +
 `            </div>` +
             //Se muestra solo en md.
-`            <div class='d-md-none col-12 col-xl-7' style='text-align:center;background-color: white;'>` +
+`            <div class='d-md-none col-12 col-xl-5' style='text-align:center;background-color: white;'>` +
 `                <img src='${base_url}/images/royal_canin_logo_02.jpg' style='padding-left:15px;margin-bottom:15px;height: 80px; width:auto; '>` +
+`            </div>` +
+`            <div class='d-md-none col-12 col-xl-2' style='text-align:center;background-color: white;'>` +
+`                <img class="button_icon" onclick="window.open('https://breeder.royalcanin.com/login','_blank');" src='${base_url}/images/logo_royal_start.svg' style='padding-left:15px;margin-top:8px;height: 80px; width:auto; '>` +
 `            </div>` +
               //Se muestra en mayores de md . 
-`            <div class='d-none d-md-block col-12 col-md-6 col-lg-6 col-xl-7' style='background-color: white;'>` +
+`            <div class='d-none d-md-block col-12 col-md-5 col-lg-5 col-xl-5' style='background-color: white;'>` +
 `                <img src='${base_url}/images/royal_canin_logo_02.jpg' style='padding-left:15px;margin-bottom:15px;height: 80px; width:auto; '>` +
 `            </div>` +
+`            <div class='d-none d-md-block col-12 col-md-2 col-lg-2 col-xl-2' style='background-color: white;'>` +
+`                <img class='button_icon' onclick="window.open('https://breeder.royalcanin.com/login','_blank');" src='${base_url}/images/logo_royal_start.svg' style='padding-left:15px;margin-top:8px;height: 80px; width:auto; '>` +
+`            </div>` +
             //Se muestra en mayores a md. 
-`            <div class='d-none d-md-block col-12 col-md-6 col-lg-4 col-xl-3 fondo_perfil_encabezado'>` +
+`            <div class='d-none d-md-block col-12 col-md-5 col-lg-3 col-xl-3 fondo_perfil_encabezado'>` +
 `                <div style="text-align:right;">
-                 <img src='http://micrositioroyalcanin.tk/images/profile.png' style='height: 80px;position: absolute; top:7px; right:30px;padding:0px;margin-bottom:-100px;'>
+                 <img src='${Cookies.get("foto_url")}' style='height: 80px;position: absolute; top:7px; right:30px;padding:0px;margin-bottom:-100px;'>
                   <span class='letra_perfil_encabezado' style="position:absolute; right: 125px; bottom: 50px;">${Cookies.get("nombres_de_usuario")}</span>
-                  <div class="letra_perfil_encabezado" style="position:absolute; right: 125px; bottom:32px;font-size:15px;">(${Cookies.get("tipo_de_usuario")})</div>
+                  <div class="letra_perfil_encabezado" style="position:absolute; right: 125px; bottom:32px;font-size:15px;">${tipo_de_usuario}</div>
                   <div class="button_cerrar_sesion" onclick="cerrar_sesion()" style="position:absolute; right: 125px; bottom: 11px;">Cerrar Sesión</div>
             </div></div>` + 
             //Se muestra solo en el md.  
@@ -416,7 +553,7 @@ function descargar_de_url(url)
 `                <div style="text-align:center;">
                   <img src='http://micrositioroyalcanin.tk/images/profile.png' style='height: 80px;position: absolute; top:12px; right:30px;padding:0px;margin-bottom:-100px;'>
                   <span class='letra_perfil_encabezado' style="position:absolute; right: 125px; bottom: 50px;">${Cookies.get("nombres_de_usuario")}</span>
-                  <div class="letra_perfil_encabezado" style="position:absolute; right: 125px; bottom:32px;font-size:15px;">(${Cookies.get("tipo_de_usuario")})</div>
+                  <div class="letra_perfil_encabezado" style="position:absolute; right: 125px; bottom:32px;font-size:15px;">${tipo_de_usuario}</div>
                   <div class="button_cerrar_sesion" onclick="cerrar_sesion()" style="position:absolute; right: 125px; bottom: 11px;">Cerrar Sesión</div>
             </div></div>`            ; 
 
@@ -425,36 +562,58 @@ function descargar_de_url(url)
 
   function llenar_menu()
   {
-    var ocultar = ""; 
-    if(Cookies.get("id_tipo_de_usuario")!=="1")
+    var ocultar_criador = ""; 
+    var ocultar_distribuidor = "";     
+
+
+    if((Cookies.get("id_tipo_de_usuario")==="2")
+      ||(Cookies.get("id_tipo_de_usuario")==="3")
+      ||(Cookies.get("id_tipo_de_usuario")==="4"))
     {
-        ocultar = "style='display:none;'"; 
+        ocultar_criador = "style='display:none;'"; 
     }
+
+    if((Cookies.get("id_tipo_de_usuario")==="5"))
+    {
+        ocultar_distribuidor = "style='display:none;'"; 
+    }    
 
       var contenido_menu = `<div class='row'>  
                     <div id='button_ver_perfil' class='col-12 button_menu' onclick='window.location.href="${base_url}/vistas/usuarios/perfil_de_usuario.html?id=${Cookies.get('id_usuario')}"'>   
                         <img id='button_perfil' src='${base_url}/images/user.png' style='margin-right: 10px;' height='40' width='40'>   
                         Mi Perfil
-                    </div>   
-                    <div id='button_ver_clientes' class='col-12 button_menu' onclick='window.location.href="${base_url}/vistas/clientes/ver_clientes.html"'>   
+                    </div>
+                    <div id='button_ver_clientes' ${ocultar_distribuidor} class='col-12 button_menu' onclick='window.location.href="${base_url}/vistas/clientes/ver_clientes.html"'>   
                         <img id='button_clientes' src='${base_url}/images/certificate.png' style='margin-right: 10px;' height='40' width='40'>   
                         Certificados
                     </div>   
-                    <div id='button_ver_usuarios' class='col-12 button_menu' onclick='window.location.href="${base_url}/vistas/usuarios/ver_usuarios.html"'>   
+                    <div id='button_ver_usuarios' ${ocultar_criador} class='col-12 button_menu' onclick='window.location.href="${base_url}/vistas/usuarios/ver_usuarios.html"'>   
                         <img src='${base_url}/images/criadores.png' style='margin-right: 10px;' height='40' width='40'>   
                         Profesionales   
                     </div>                       
-                    <div id='button_ver_mascotas' onclick='window.location.href="${base_url}/vistas/mascotas/ver_mascotas.html"' class='col-12 button_menu'>   
+                    <div id='button_ver_mascotas' ${ocultar_distribuidor} onclick='window.location.href="${base_url}/vistas/mascotas/ver_mascotas.html"' class='col-12 button_menu'>   
                         <img src='${base_url}/images/mascotas.png' style='margin-right: 10px;' height='40' width='40'>   
                         Mascotas
                     </div>   
-                    <div id='button_ver_tipos_de_mascotas' ${ocultar} onclick='window.location.href="${base_url}/vistas/tipos_de_mascota/ver_tipos_de_mascota.html"' class='col-12 button_menu'>   
+                    <div id='button_ver_tipos_de_mascotas' ${ocultar_distribuidor} ${ocultar_criador} onclick='window.location.href="${base_url}/vistas/tipos_de_mascota/ver_tipos_de_mascota.html"' class='col-12 button_menu'>   
                         <img src='${base_url}/images/dog.png' style='margin-right: 10px;' height='40' width='40'>   
                         Tipos de Mascotas   
                     </div>   
-                    <div id='button_ver_kits' onclick='window.location.href="${base_url}/vistas/kits/ver_kits.html"' class='col-12 button_menu'>   
+                    <div id='button_ver_kits' ${ocultar_distribuidor} onclick='window.location.href="${base_url}/vistas/kits/ver_kits.html"' class='col-12 button_menu'>   
                         <img src='${base_url}/images/kits.png' style='margin-right: 10px;' height='40' width='40'> Kits  
-                    </div>   
+                    </div>
+                    <div id='button_ver_solicitudes_de_acceso' ${ocultar_criador} class='col-12 button_menu' onclick='window.location.href="${base_url}/vistas/solicitudes_de_acceso/ver_solicitudes_de_acceso.html"'>   
+                        <img src='${base_url}/images/key.png' style='margin-right: 10px;' height='40' width='40'>   
+                        Solicitudes de Acceso
+                    </div>
+                    <div id='button_ver_terminos_y_condiciones' class='col-12 button_menu' onclick='window.location.href="${base_url}/vistas/ver_terminos_y_condiciones.html"'>   
+                        <img src='${base_url}/images/legal.png' style='margin-right: 10px;' height='40' width='40'>   
+                        Términos y Condiciones
+                    </div>
+                    <div style='display:none;' id='button_ver_manual_de_usuario' class='col-12 button_menu' onclick='window.location.href="${base_url}/vistas/solicitudes_de_acceso/ver_solicitudes_de_acceso.html"'>   
+                        <img src='${base_url}/images/manual.png' style='margin-right: 10px;' height='40' width='40'>   
+                        Manual de Usuario
+                    </div>
                 </div>`   
       $("#menu").html(contenido_menu);  
   }
